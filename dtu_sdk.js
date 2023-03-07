@@ -11,7 +11,7 @@ const DEFAULT_ELEMENTS_EVENTS = {
         undefined: ['click'],
       };
 const DEFAULT_LISTEN_TO_DEFAULT_EVENTS = true;
-const DEFAULT_CALLBACK = DTU_RX_API_submint_report_endpoint;
+const DEFAULT_CALLBACK = console.log;
 
 
 class DoTheyUse {
