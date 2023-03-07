@@ -19,14 +19,14 @@ This information helps team to:
 Addressed answers on these questions lead to better UX both for Product teams and for Product users. Product gets better and this better is driven not by assumptions but by real usage data by real users.
 
 ## Problems this SDK solves
-* SDK was made for ["Do They Use"](https://dotheyuse.com) web service to simplify:
+* SDK is made for ["Do They Use"](https://dotheyuse.com) web service to simplify:
   * adding listeners for specified events ("click", "change", etc.) for specified elements (link, checkbox, dropdown, etc.) of web page(s) it is installed for;
   * translation these events into web log reports;
   * sending these reports to ["Do They Use"](https://dotheyuse.com) service API.
-* Start teamwork and collaboration for users of "Do They Use" service and of this SDK.
+* This repository starts teamwork and collaboration for users of "Do They Use" service and of this SDK.
 
 ## How it works
-When installed in web page, SDK listens to events from specified (tagged by `data-dtu` attribute by default) elements on web page, builds JSON reports and sends them to specified `callback` (which is `console.log` by default) function. `callback` could be a function that sends these reports to API (and this is how this SDK is used in "Do They Use" service).
+When installed in web page (see for example [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html)), SDK listens to events from specified (tagged by `data-dtu` attribute by default) elements on web page, builds JSON reports and sends them to specified `callback` (which is `console.log` by default) function. `callback` could be a function that sends these reports to API (and this is how this SDK is used in "Do They Use" service).
 
 ## How to install
 1. At the bottom of your web page (right before `</body>` closing tag) import and init SDK with any `ctag` (for example, `TEST CTAG`):
@@ -38,6 +38,7 @@ When installed in web page, SDK listens to events from specified (tagged by `dat
     });
   </script>
 ```
+(check out how it is done in [code of SDK demo HTML page](https://github.com/alexeyhimself/dtu_sdk_js/blob/main/dtu_sdk_js_demo.html))
 2. Check that SDK was installed correctly. In browser's dev console execute:
 ```
 dtu.status
@@ -46,17 +47,19 @@ Correctly installed SDK will reply:
 ```
 Ready
 ```
+(you can try this in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html)).
 
 ## How to use
-1. To any (of supported types) element of your web page add `data-dtu` attribute. For example:
+1. To any (of [supported types](/dtu_sdk.js#L6)) element of your web page add `data-dtu` attribute. For example:
 ```
 <select data-dtu="some dropdown">
   <option>value 1</option>
   <option>value 2</option>
 </select>
 ```
-2. Fire event for this element. For example, change value in this drop-down.
-3. In browser's dev console you should see:
+2. Fire supported event for this element. For example, change value in this drop-down.
+3. In browser's dev console you will see:
 ```
 {ctag: 'TEST CTAG', topic: 'default', feature: 'some dropdown', feature_path: ['some dropdown'], value: 'value 2', …}
 ```
+You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html).
