@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>"Do They Use" JavaScript SDK HTML demo page</title>
+  </head>
+  <body>
+    <select data-dtu="some dropdown">
+      <option>value 1</option>
+      <option>value 2</option>
+    </select>
+
+    <script src="https://raw.githubusercontent.com/alexeyhimself/dtu_sdk_js/main/dtu_sdk.js"></script>
+    <script type="text/javascript">
+      const dtu = dotheyuse({
+        'ctag': 'TEST CTAG',
+      });
+    </script>
+  </body>
+</html>
