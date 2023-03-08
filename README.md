@@ -62,6 +62,6 @@ Incorrectly installed SDK will reply with an error message related to that speci
 2. Fire supported event for this element. For example, change value in this drop-down.
 3. In browser's dev console you will see:
 ```
-{ctag: 'TEST CTAG', topic: 'default', feature: 'some dropdown', feature_path: ['some dropdown'], value: 'value 2', …}
+{ctag: 'TEST CTAG', topic: 'default', feature: 'some dropdown', value: 'value 2', …}
 ```
 You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html).
