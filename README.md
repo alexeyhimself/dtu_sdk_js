@@ -1,4 +1,4 @@
-# JavaScript SDK for ["Do They Use"](https://dotheyuse.com) service [![CircleCI](https://dl.circleci.com/status-badge/img/gh/alexeyhimself/dtu_sdk_js/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/alexeyhimself/dtu_sdk_js/tree/main)
+# JavaScript SDK for ["Do They Use"](https://dotheyuse.com) service [![CircleCI](https://dl.circleci.com/status-badge/img/gh/alexeyhimself/dtu_sdk_js/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/alexeyhimself/dtu_sdk_js/tree/main)
 
 ## About "Do They Use" service
 ["Do They Use"](https://dotheyuse.com) service is made to help teams to make data-driven decisions for their products. 
