@@ -12,6 +12,7 @@ jobs:
           command: |
             npm install --save-dev jest  # https://jestjs.io/docs/getting-started
             npm test
+            python3 coverage_helper.py
 
 workflows:
   run-unit-tests:
