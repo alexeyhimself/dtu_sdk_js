@@ -26,16 +26,23 @@ Addressed answers on these questions lead to better UX both for Product teams an
   * sending these reports to ["Do They Use"](https://dotheyuse.com) service API.
 * This repository starts teamwork and collaboration for users of "Do They Use" service and of this SDK.
 
+## Demo
+1. Open [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html)
+2. Open browser's dev console
+3. Change drop-down value on demo page
+
+What to expect: on each drop-down value change in console will appear new report.
+
 ## How it works
 When installed in web page (see for example [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html)), SDK listens to events from specified (tagged by `data-dtu` attribute by default) elements on web page, builds JSON reports and sends them to specified `callback` (which is `console.log` by default) function. `callback` could be a function that sends these reports to API (and this is how this SDK is used in "Do They Use" service).
 
-## How to install
+## How to install on web-page
 1. At the bottom of your web page (right before `</body>` closing tag) import and init SDK with any `ctag` (for example, `TEST CTAG`):
 ```
   <script src="https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk.js"></script>
   <script type="text/javascript">
     const dtu = dotheyuse({
-      'ctag': 'TEST CTAG',
+      'ctag': 'DTU CTAG',  // DTU TAG - is a tag from "Do They Use" service
     });
   </script>
 ```
@@ -53,6 +60,7 @@ Correctly installed SDK will reply:
 Incorrectly installed SDK will reply with an error message related to that specific problem.
 
 ## How to use
+### Basic usage
 1. To any (of [supported types](/dtu_sdk.js#L6)) element of your web page add `data-dtu` attribute. For example:
 ```
 <select data-dtu="some dropdown">
@@ -63,9 +71,40 @@ Incorrectly installed SDK will reply with an error message related to that speci
 2. Fire supported event for this element. For example, change value in this drop-down.
 3. In browser's dev console you will see:
 ```
-{ctag: 'TEST CTAG', topic: 'default', feature: 'some dropdown', value: 'value 2', …}
+{ctag: 'DTU CTAG', topic: 'default', feature: 'some dropdown', value: 'value 2', …}
 ```
 You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html).
+
+### Advanced usage
+1. Set your own `callback` (`my_custom_function`, for example) function:
+```
+<script type="text/javascript">
+  const dtu = dotheyuse({
+    'ctag': 'DTU CTAG',
+    'callback': my_custom_function
+  });
+</script>
+```
+3. Disable automatic bind to elements to `listen` events
+```
+<script type="text/javascript">
+  const dtu = dotheyuse({
+    'ctag': 'DTU CTAG',
+    'listen': false
+  });
+</script>
+```
+5. Change default (`data-dtu`) bind attribute (to `data-testid` for example):
+```
+<script type="text/javascript">
+  const dtu = dotheyuse({
+    'ctag': 'DTU CTAG',
+    'dataset-attribute': 'testid'
+  });
+</script>
+```
+**Please note**, that `data-` preffix is omited.
+
 
 ## How to run tests
 1. Install [Jest](https://jestjs.io/docs/getting-started) framework:
