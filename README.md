@@ -66,3 +66,20 @@ Incorrectly installed SDK will reply with an error message related to that speci
 {ctag: 'TEST CTAG', topic: 'default', feature: 'some dropdown', value: 'value 2', …}
 ```
 You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html).
+
+## How to run tests
+1. Install [Jest](https://jestjs.io/docs/getting-started) framework:
+```
+npm install --save-dev jest
+```
+2. In project directory run:
+```
+npm test
+```
+
+## How to check test coverage
+1. In project directory run:
+```
+npx jest --coverage
+```
+2. In project directory will appear `coverage` directory with `index.html` and `dtu_sdk.js.html` files
