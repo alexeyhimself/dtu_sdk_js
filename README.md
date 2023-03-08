@@ -100,11 +100,21 @@ You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sd
 <script type="text/javascript">
   const dtu = dotheyuse({
     'ctag': 'DTU CTAG',
-    'dataset-attribute': 'testid'
+    'dtu_attribute': 'testid'
   });
 </script>
 ```
 **Please note**, that `data-` preffix is omited.
+
+4. Specify `topic` explicitly:
+```
+<script type="text/javascript">
+  const dtu = dotheyuse({
+    'ctag': 'DTU CTAG',
+    'topic': 'custom'
+  });
+</script>
+```
 
 
 ## How to run tests
@@ -126,4 +136,4 @@ npx jest --coverage
 
 
 ## License
-GNU GPLv3
+[GNU GPLv3](/LICENSE)
