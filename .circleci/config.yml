@@ -13,3 +13,8 @@ jobs:
             cd dtu_sdk_js
             npm install --save-dev jest  # https://jestjs.io/docs/getting-started
             npm test
+
+workflows:
+  run-unit-tests:
+    jobs:
+      - test
