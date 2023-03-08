@@ -42,7 +42,7 @@ When installed in web page (see for example [SDK demo HTML page](https://alexeyh
   <script src="https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk.js"></script>
   <script type="text/javascript">
     const dtu = dotheyuse({
-      'ctag': 'DTU CTAG',  // DTU TAG - is a tag from "Do They Use" service
+      'ctag': 'DTU CTAG',  // DTU CTAG - is a tag from "Do They Use" service
     });
   </script>
 ```
