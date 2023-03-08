@@ -10,7 +10,9 @@ jobs:
       - checkout
       - run:
           command: |
-            cd dtu_sdk_js
+            pwd
+            ls -l
+            # cd dtu_sdk_js
             npm install --save-dev jest  # https://jestjs.io/docs/getting-started
             npm test
 
