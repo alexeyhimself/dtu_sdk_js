@@ -86,7 +86,7 @@ You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sd
   });
 </script>
 ```
-3. Disable automatic bind to elements to `listen` events
+2. Disable automatic bind to elements to `listen` events
 ```
 <script type="text/javascript">
   const dtu = dotheyuse({
@@ -95,7 +95,7 @@ You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sd
   });
 </script>
 ```
-5. Change default (`data-dtu`) bind attribute (to `data-testid` for example):
+3. Change default (`data-dtu`) bind attribute (to `data-testid` for example):
 ```
 <script type="text/javascript">
   const dtu = dotheyuse({
