@@ -44,10 +44,6 @@ class DoTheyUse {
     this.status = DEFAULT_READY_STATUS;
   }
 
-  status() {
-    return this.status;
-  }
-
   config_is_valid(config) {
     if (!config) {
       this.problem_description = "dotheyuse not working: config was not provided durinig initialization. ";
@@ -87,12 +83,12 @@ class DoTheyUse {
   send_report_to_dtu_api() {
     // const json_report = JSON.stringify(this.report); // stringify before sending as payload
     const json_report = this.report; // till no real networking - no stringify as well to save CPU time
-    this.callback(json_report);
+    return this.callback(json_report);
   }
 
   send(element, value) {
     this.make_report(element, value);
-    this.send_report_to_dtu_api();
+    return this.send_report_to_dtu_api();
   }
 
   collect_dtu_elements() {
