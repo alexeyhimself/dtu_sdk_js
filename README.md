@@ -45,9 +45,11 @@ dtu.status
 ```
 Correctly installed SDK will reply:
 ```
-Ready
+'Ready'
 ```
 (you can try this in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html)).
+
+Incorrectly installed SDK will reply with an error message related to that specific problem.
 
 ## How to use
 1. To any (of [supported types](/dtu_sdk.js#L6)) element of your web page add `data-dtu` attribute. For example:
