@@ -124,3 +124,5 @@ class DoTheyUse {
 function dotheyuse(config) {
   return new DoTheyUse(config);
 }
+
+exports.dotheyuse = dotheyuse;
