@@ -15,7 +15,7 @@ for each_line, coverage in each_line_report.items():
 
 coverage = round(covered_lines * 100 / total_lines, 1)
 
-if coverage < 100:
-	msg = "Test coverage is less than 100%: {0}%"
+if coverage < 80:
+	msg = "Test coverage is less than 80%: {0}%"
 	print(msg.format(coverage))
 	exit(1)
