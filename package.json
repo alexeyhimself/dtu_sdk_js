@@ -4,5 +4,12 @@
   },
   "scripts": {
     "test": "jest"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coverageReporters": ["json", "html"]
+  },
+  "dependencies": {
+    "jest-environment-jsdom": "^29.5.0"
   }
 }
