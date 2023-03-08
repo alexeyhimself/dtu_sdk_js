@@ -123,3 +123,7 @@ npm test
 npx jest --coverage
 ```
 2. In project directory will appear `coverage` directory with `index.html` and `dtu_sdk.js.html` files
+
+
+## License
+GNU GPLv3
