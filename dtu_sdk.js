@@ -125,4 +125,5 @@ function dotheyuse(config) {
   return new DoTheyUse(config);
 }
 
-exports.dotheyuse = dotheyuse;
+try { exports.dotheyuse = dotheyuse; } // for jest unit tests
+catch (error) {} // to avoid an error "Uncaught ReferenceError: exports is not defined" in browser's dev console
