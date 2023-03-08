@@ -31,7 +31,7 @@ When installed in web page (see for example [SDK demo HTML page](https://alexeyh
 ## How to install
 1. At the bottom of your web page (right before `</body>` closing tag) import and init SDK with any `ctag` (for example, `TEST CTAG`):
 ```
-  <script src="https://raw.githubusercontent.com/alexeyhimself/dtu_sdk_js/main/dtu_sdk.js"></script>
+  <script src="https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk.js"></script>
   <script type="text/javascript">
     const dtu = dotheyuse({
       'ctag': 'TEST CTAG',
