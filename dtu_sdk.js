@@ -12,12 +12,20 @@ const DEFAULT_ELEMENTS_EVENTS = {
       };
 const DEFAULT_LISTEN_TO_DEFAULT_EVENTS = true;
 const DEFAULT_CALLBACK = console.log;
+const DEFAULT_PROBLEM_DESCRIPTION = '';
+const DEFAULT_NOT_READY_STATUS = 'Not ready. See problem description above';
+const DEFAULT_READY_STATUS = 'Ready';
 
 
 class DoTheyUse {
   constructor(config) {
-    if (!this.config_is_valid(config))
+    this.status = DEFAULT_NOT_READY_STATUS;
+    this.problem_description = DEFAULT_PROBLEM_DESCRIPTION;
+
+    if (!this.config_is_valid(config)) {
+      console.error(this.problem_description);
       return;
+    }
 
     this.ctag = config.ctag;
     this.topic = config.topic || DEFAULT_TOPIC;
@@ -32,19 +40,25 @@ class DoTheyUse {
 
     if (this.listen_default_events)
       this.listen();
+
+    this.status = DEFAULT_READY_STATUS;
+  }
+
+  status() {
+    return this.status;
   }
 
   config_is_valid(config) {
     if (!config) {
-      console.error("dotheyuse not working: config was not provided durinig initialization. ");
+      this.problem_description = "dotheyuse not working: config was not provided durinig initialization. ";
       return false;
     }
     else if (config.constructor !== Object) {
-      console.error("dotheyuse not working: config must be a dictionary, but given a: ", typeof(config));
+      this.problem_description = "dotheyuse not working: config must be a dictionary, but given a: " + typeof(config);
       return false;
     }
     else if (!config.ctag) {
-      console.error("dotheyuse not working: config must contain 'ctag'. ");
+      this.problem_description = "dotheyuse not working: config must contain 'ctag'. ";
       return false;
     }
     else {
