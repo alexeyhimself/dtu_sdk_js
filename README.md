@@ -47,6 +47,7 @@ When installed in web page (see for example [SDK demo HTML page](https://alexeyh
   </script>
 ```
 (check out how it is done in [code of SDK demo HTML page](https://github.com/alexeyhimself/dtu_sdk_js/blob/main/dtu_sdk_js_demo.html))
+
 2. Check that SDK was installed correctly. In browser's dev console execute:
 ```
 dtu.status
