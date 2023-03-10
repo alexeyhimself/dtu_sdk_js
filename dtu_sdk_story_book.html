@@ -11,72 +11,126 @@
     th, td {
       border-style: groove;
       padding: 5px;
+      text-align: left;
+    }
+    h3 {
+      margin-bottom: 7px;
     }
   </style>
   <body>
+    <h1>Story Book for <a href="https://github.com/alexeyhimself/dtu_sdk_js">"Do They Use" service JavaScript SDK</a></h1>
+    <p>Listed all supported by JS SDK elements with their events and report samples.<br> Elements are interactive: click and change values and see what will be sent in this case in report.</p>
+    <h3>&lt;input&gt;</h3>
     <table>
       <tr>
         <th>element type</th>
         <th>element</th>
-        <th>event</th>
-        <th>element, value in report</th>
+        <th>listen event</th>
+        <th>"data-dtu" attribute value</th>
+        <th>element and value will be sent in a report</th>
       </tr>
       <tbody>
-        <tr>
-          <td>select-one</td>
-          <td>
-            <select data-dtu="some dropdown">
-              <option>value 1</option>
-              <option>value 2</option>
-            </select>        
-          </td>
-          <td>change</td>
-          <td id="some dropdown">-</td>
-        </tr>
         <tr>
           <td>datetime-local</td>
           <td>
             <input type="datetime-local" data-dtu="some datetime-local"/>
           </td>
           <td>change</td>
-          <td id="some datetime-local">-</td>
+          <td>some datetime-local</td>
+          <td id="some datetime-local">...</td>
         </tr>
+        <tr>
         <tr>
           <td>button</td>
           <td>
-            <button type="button" data-dtu="some button1"/>button1</button>
+            <input type="button" data-dtu="some input button" value="input button value" />
           </td>
           <td>click</td>
-          <td id="some button1">-</td>
-        </tr>
-        <tr>
-          <td>button</td>
-          <td>
-            <input type="button" data-dtu="some button2" value="button2" />
-          </td>
-          <td>click</td>
-          <td id="some button2">-</td>
-        </tr>
-        <tr>
-          <td>link</td>
-          <td>
-            <a href="#" data-dtu="some link"/>link</a>
-          </td>
-          <td>click</td>
-          <td id="some link">-</td>
+          <td>some input button</td>
+          <td id="some input button">...</td>
         </tr>
       </tbody>
     </table>
     
+    <h3>&lt;select&gt;</h3>
+    <table>
+      <tr>
+        <th>element type</th>
+        <th>element</th>
+        <th>listen event</th>
+        <th>"data-dtu" attribute value</th>
+        <th>element and value will be sent in a report</th>
+      </tr>
+      <tbody>
+        <tr>
+          <td>select-one</td>
+          <td>
+            <select data-dtu="some dropdown">
+              <option>some value 1</option>
+              <option>some value 2</option>
+            </select>        
+          </td>
+          <td>change</td>
+          <td>some dropdown</td>
+          <td id="some dropdown">...</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>&lt;a&gt;</h3>
+    <table>
+      <tr>
+        <th>element type</th>
+        <th>element</th>
+        <th>listen event</th>
+        <th>"data-dtu" attribute value</th>
+        <th>element and value will be sent in a report</th>
+      </tr>
+      <tbody>
+        <tr>
+          <td>-</td>
+          <td>
+            <a href="#" data-dtu="some link"/>some text in link</a>
+          </td>
+          <td>click</td>
+          <td>some link</td>
+          <td id="some link">...</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>&lt;button&gt;</h3>
+    <table>
+      <tr>
+        <th>element type</th>
+        <th>element</th>
+        <th>listen event</th>
+        <th>"data-dtu" attribute value</th>
+        <th>element and value will be sent in a report</th>
+      </tr>
+      <tbody>
+        <tr>
+          <td>submit</td>
+          <td>
+            <button type="submit" data-dtu="some button"/>button text</button>
+          </td>
+          <td>click</td>
+          <td>some button</td>
+          <td id="some button">...</td>
+        </tr>
+      </tbody>
+    </table>
+
     <script type="text/javascript">
       function update_storybook(report) {
-        let td_element = document.getElementById(report.feature);
-        let element_value = {'element': report.feature, 'value': report.value};
+        let td_element = document.getElementById(report.element);
+        let element_value = {'element': report.element, 'value': report.value};
         td_element.innerHTML = JSON.stringify(element_value);
         console.log(JSON.stringify(report))
-      }
+      };
     </script>
-    <script src="https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk.js"></script>
+
+    <script src="dtu_sdk.js"></script>
     <script type="text/javascript">
       const dtu = dotheyuse({
         'ctag': 'DTU STORY BOOK CTAG',

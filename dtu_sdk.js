@@ -9,6 +9,7 @@ const DEFAULT_ELEMENTS_EVENTS = {
         'button': ['click'],
         '': ['click'], // link button in bootstrap 5 at least
         undefined: ['click'],
+        'submit': ['click'],
       };
 const DEFAULT_LISTEN_TO_DEFAULT_EVENTS = true;
 const DEFAULT_CALLBACK = console.log;
@@ -69,8 +70,8 @@ class DoTheyUse {
   }
 
   enrich_report(element, value) {
-    this.report.feature = element;
-    this.report.feature_path = ['', element];
+    this.report.element = element;
+    this.report.element_path = ['', element];
     this.report.value = value;
     this.report.date_time = Date.now();
   }
@@ -98,20 +99,26 @@ class DoTheyUse {
   listen() {
     for (let i = 0; i < this.elements_to_listen_to.length; i++) {
       const element = this.elements_to_listen_to[i];
-      const events_to_listen = DEFAULT_ELEMENTS_EVENTS[element.type];
-      const dtu_this = this;
-      for (let j = 0; j < events_to_listen.length; j++) {
-        try {
+      try {
+        const events_to_listen = DEFAULT_ELEMENTS_EVENTS[element.type];
+        const dtu_this = this;
+        for (let j = 0; j < events_to_listen.length; j++) {
           element.addEventListener(events_to_listen[j], function (e) {
             const event_this = this; // to distinguish event.this and dtu.this
             const el = event_this.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE];
-            const val = event_this.value;
+            let val = undefined;
+
+            if (['A', 'BUTTON'].includes(element.tagName))
+              val = element.innerText;
+            else
+              val = event_this.value;
+
             dtu_this.send(el, val);
           }, false);
         }
-        catch (error) {
-          console.error("DoTheyUse can't bind listener to an element: ", element, " due to an error: ", error);
-        }
+      }
+      catch (error) {
+        console.error("Unsupported element:\n", element, "\n", error);
       }
     }
   }
