@@ -88,7 +88,7 @@ test('SDK .send("element", "value") method sends "element" and "value" in report
   const el = 'some element';
   const val = 'some value';
   let report = dtu.send(el, val);
-  expect(report.feature).toEqual(el);
+  expect(report.element).toEqual(el);
   expect(report.value).toEqual(val);
 });
 
