@@ -43,10 +43,10 @@ Currently [supported](/dtu_sdk.js#L6) the following elements types:
 * button
 * link
 
-You can play with them all in a [Story Book](/dtu_sdk_story_book.html). 
+You can play with them all in a [Story Book](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_story_book.html).
 
 ## Story Book
-All currently supported elements available in this [Story Book](/dtu_sdk_story_book.html).
+All currently supported elements are available in a [Story Book](/dtu_sdk_story_book.html) and this Book is published with GitHub Pages [here](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_story_book.html).
 
 ## How to install on your web-page
 1. At the bottom of your web page (right before `</body>` closing tag) import and init SDK with any `ctag` (for example, `TEST CTAG`):
