@@ -36,7 +36,19 @@ What to expect: on each drop-down value change in console will appear new report
 ## How it works
 When installed in web page (see for example [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html)), SDK listens to events from specified (tagged by `data-dtu` attribute by default) elements on web page, builds JSON reports and sends them to specified `callback` (which is `console.log` by default) function. `callback` could be a function that sends these reports to API (and this is how this SDK is used in "Do They Use" service).
 
-## How to install on web-page
+## Supported elements types
+Currently [supported](/dtu_sdk.js#L6) the following elements types:
+* select-one (dropdown list)
+* datetime-local
+* button
+* link
+
+You can play with them all in a [Story Book](/dtu_sdk_story_book.html). 
+
+## Story Book
+All currently supported elements available in this [Story Book](/dtu_sdk_story_book.html).
+
+## How to install on your web-page
 1. At the bottom of your web page (right before `</body>` closing tag) import and init SDK with any `ctag` (for example, `TEST CTAG`):
 ```
   <script src="https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk.js"></script>

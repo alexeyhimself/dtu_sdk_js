@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>"Do They Use" JavaScript SDK HTML Story Book page</title>
+  </head>
+  <style type="text/css">
+    table, th, td {
+      border: 1px solid lightgray;
+      border-collapse: collapse;
+    }
+    th, td {
+      border-style: groove;
+      padding: 5px;
+    }
+  </style>
+  <body>
+    <table>
+      <tr>
+        <th>element type</th>
+        <th>element</th>
+        <th>event</th>
+        <th>element, value in report</th>
+      </tr>
+      <tbody>
+        <tr>
+          <td>select-one</td>
+          <td>
+            <select data-dtu="some dropdown">
+              <option>value 1</option>
+              <option>value 2</option>
+            </select>        
+          </td>
+          <td>change</td>
+          <td id="some dropdown">-</td>
+        </tr>
+        <tr>
+          <td>datetime-local</td>
+          <td>
+            <input type="datetime-local" data-dtu="some datetime-local"/>
+          </td>
+          <td>change</td>
+          <td id="some datetime-local">-</td>
+        </tr>
+        <tr>
+          <td>button</td>
+          <td>
+            <button type="button" data-dtu="some button1"/>button1</button>
+          </td>
+          <td>click</td>
+          <td id="some button1">-</td>
+        </tr>
+        <tr>
+          <td>button</td>
+          <td>
+            <input type="button" data-dtu="some button2" value="button2" />
+          </td>
+          <td>click</td>
+          <td id="some button2">-</td>
+        </tr>
+        <tr>
+          <td>link</td>
+          <td>
+            <a href="#" data-dtu="some link"/>link</a>
+          </td>
+          <td>click</td>
+          <td id="some link">-</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <script type="text/javascript">
+      function update_storybook(report) {
+        let td_element = document.getElementById(report.feature);
+        let element_value = {'element': report.feature, 'value': report.value};
+        td_element.innerHTML = JSON.stringify(element_value);
+        console.log(JSON.stringify(report))
+      }
+    </script>
+    <script src="https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk.js"></script>
+    <script type="text/javascript">
+      const dtu = dotheyuse({
+        'ctag': 'DTU STORY BOOK CTAG',
+        'callback': update_storybook,
+      });
+    </script>
+  </body>
+</html>
