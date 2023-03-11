@@ -1,6 +1,6 @@
 import json
 
-MINIMUM_COVERAGE_PERCENT = 70
+MINIMUM_COVERAGE_PERCENT = 80
 
 
 f = open('coverage/coverage-final.json')

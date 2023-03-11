@@ -142,11 +142,11 @@ class DoTheyUse {
   }
 
   listen() {
-    for (let i = 0; i < this.elements_to_listen_to.length; i++) {
-      const element = this.elements_to_listen_to[i];
+    const dtu_this = this;
+    for (let i = 0; i < dtu_this.elements_to_listen_to.length; i++) {
+      const element = dtu_this.elements_to_listen_to[i];
       try {
-        const events_to_listen = this.supported_input_types_and_events[element.type];
-        const dtu_this = this;
+        const events_to_listen = dtu_this.supported_input_types_and_events[element.type];
         for (let j = 0; j < events_to_listen.length; j++) {
           element.addEventListener(events_to_listen[j], function (e) {
             const event_this = this; // to distinguish event.this and dtu.this
@@ -156,8 +156,8 @@ class DoTheyUse {
         }
       }
       catch (error) {
-        element.parentElement.parentElement.classList.add('unsupported');
         console.error("Unsupported element:\n", element, "\n", error);
+        element.parentElement.parentElement.className = 'unsupported';
       }
     }
   }
@@ -167,5 +167,8 @@ function dotheyuse(config) {
   return new DoTheyUse(config);
 }
 
-try { exports.dotheyuse = dotheyuse; } // for jest unit tests
+try { // for jest unit tests
+  exports.dotheyuse = dotheyuse; 
+  exports.SUPPORTED_INPUT_TYPES_AND_EVENTS = SUPPORTED_INPUT_TYPES_AND_EVENTS;
+}
 catch (error) {} // to avoid an error "Uncaught ReferenceError: exports is not defined" in browser's dev console

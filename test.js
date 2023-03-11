@@ -73,25 +73,100 @@ test('SDK does not listen if it has status "Not ready"', () => {
 
 
 // form report
-test('SDK .form_report() method forms report for "select-one"', () => {
+const SUPPORTED_INPUT_TYPES_AND_EVENTS = imports.SUPPORTED_INPUT_TYPES_AND_EVENTS;
+const types_all = Object.keys(SUPPORTED_INPUT_TYPES_AND_EVENTS);
+const types_secret_or_long = ['password', 'text'];
+const types_files = ['file'];
+const types_to_exclude = types_secret_or_long.concat(types_files);
+
+let types_normal = [...types_all]; // types_normal = types_all - types_to_exclude
+for (let i in types_to_exclude) {
+  const index = types_normal.indexOf(types_to_exclude[i]);
+  if (index > -1)
+    types_normal.splice(index, 1);
+}
+
+test.each(types_normal)('SDK .form_report() method works for type: %s', (type) => {
   let config = {...minimum_valid_config};
   config.callback = mock_send;
   const dtu = imports.dotheyuse(config);
 
   let event = {};
   event['dataset'] = {};
-  const element_name = 'some select-one';
+  const element_name = 'some ' + type;
   event['dataset'][dtu.dtu_attribute] = element_name;
-  const element_value = 'unit test val 1';
+  const element_value = 'unit test val';
   event['value'] = element_value;
 
-  let element = {'type': 'select-one'};
+  let element = {'type': type};
   let report = dtu.form_report(element, event);
 
   expect(report.element).toEqual(element_name);
   expect(report.value).toEqual(element_value);
 });
 
+test.each(types_secret_or_long)('SDK .form_report() method forms report for type: %s', (type) => {
+  let config = {...minimum_valid_config};
+  config.callback = mock_send;
+  const dtu = imports.dotheyuse(config);
+
+  let event = {};
+  event['dataset'] = {};
+  const element_name = 'some ' + type;
+  event['dataset'][dtu.dtu_attribute] = element_name;
+  const element_value = 'unit test val';
+  event['value'] = element_value;
+
+  let element = {'type': type};
+  let report = dtu.form_report(element, event);
+
+  expect(report.element).toEqual(element_name);
+  expect(report.value).toEqual(element_value.length);
+});
+
+test.each(types_files)('SDK .form_report() method forms report for type: %s', (type) => {
+  let config = {...minimum_valid_config};
+  config.callback = mock_send;
+  const dtu = imports.dotheyuse(config);
+
+  let event = {};
+  event['dataset'] = {};
+  const element_name = 'some ' + type;
+  event['dataset'][dtu.dtu_attribute] = element_name;
+
+  let element = {'type': type, 'files': [{'name': 1}, {'name': 2}]};
+  let report = dtu.form_report(element, event);
+
+  expect(report.element).toEqual(element_name);
+  expect(report.value).toEqual([1, 2]);
+});
+
+test.each(['A', 'BUTTON'])('SDK .form_report() method forms value of innerText for tagName: %s', (tag) => {
+  let config = {...minimum_valid_config};
+  config.callback = mock_send;
+  const dtu = imports.dotheyuse(config);
+
+  let event = {};
+  event['dataset'] = {};
+  const element_name = 'some ' + tag;
+  event['dataset'][dtu.dtu_attribute] = element_name;
+  const element_value = 'unit test val';
+
+  let element = {'type': undefined, 'tagName': tag, 'innerText': element_value};
+  let report = dtu.form_report(element, event);
+
+  expect(report.element).toEqual(element_name);
+  expect(report.value).toEqual(element_value);
+});
+
+test('SDK .listen() method throws an error if unsupported element type', () => {
+  let config = {...minimum_valid_config};
+  const dtu = imports.dotheyuse(config);
+  let element = {'type': 'unit test unsupported type', 'parentElement': {'parentElement': {'className': undefined}}};
+  dtu.elements_to_listen_to = [element];
+  dtu.listen();
+  expect(element.parentElement.parentElement.className).toEqual('unsupported');
+});
 
 
 //// send
