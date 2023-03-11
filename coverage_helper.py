@@ -1,5 +1,8 @@
 import json
 
+MINIMUM_COVERAGE_PERCENT = 70
+
+
 f = open('coverage/coverage-final.json')
 data = json.load(f)
 tested_file_path = list(data.keys())[0]
@@ -15,7 +18,10 @@ for each_line, coverage in each_line_report.items():
 
 coverage = round(covered_lines * 100 / total_lines, 1)
 
-if coverage < 70:
-	msg = "Test coverage is less than 70%: {0}%"
-	print(msg.format(coverage))
+msg = "Test coverage is: {0}%"
+print(msg.format(coverage))
+
+if coverage < MINIMUM_COVERAGE_PERCENT:
+	msg = "This is less than {0}% minimum threshold, so I fail CI whith exit 1"
+	print(msg.format(MINIMUM_COVERAGE_PERCENT))
 	exit(1)

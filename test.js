@@ -7,6 +7,10 @@ const imports = require('./dtu_sdk.js');
 let minimum_valid_config = {'ctag': 'unit test'};
 const minimum_valid_report = {...minimum_valid_config};
 
+function mock_send(report) {
+  return report;
+}
+
 
 // Minimal configuration tests
 test('SDK replies with status "Not ready" if config is not specified', () => {
@@ -68,9 +72,27 @@ test('SDK does not listen if it has status "Not ready"', () => {
 });
 
 
-function mock_send(report) {
-  return report;
-}
+// form report
+test('SDK .form_report() method forms report for "select-one"', () => {
+  let config = {...minimum_valid_config};
+  config.callback = mock_send;
+  const dtu = imports.dotheyuse(config);
+
+  let event = {};
+  event['dataset'] = {};
+  const element_name = 'some select-one';
+  event['dataset'][dtu.dtu_attribute] = element_name;
+  const element_value = 'unit test val 1';
+  event['value'] = element_value;
+
+  let element = {'type': 'select-one'};
+  let report = dtu.form_report(element, event);
+
+  expect(report.element).toEqual(element_name);
+  expect(report.value).toEqual(element_value);
+});
+
+
 
 //// send
 test('SDK .send() method sends "ctag" in report', () => {
@@ -87,7 +109,7 @@ test('SDK .send("element", "value") method sends "element" and "value" in report
   const dtu = imports.dotheyuse(config);
   const el = 'some element';
   const val = 'some value';
-  let report = dtu.send(el, val);
+  let report = dtu.send({'element': el, 'value': val});
   expect(report.element).toEqual(el);
   expect(report.value).toEqual(val);
 });
