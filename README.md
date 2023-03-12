@@ -3,9 +3,9 @@
 
 ## About "Do They Use" service
 ["Do They Use"](https://dotheyuse.com) service is made to help teams to make data-driven decisions for their products. 
-They way it helps to make data-driven decisions - is by providing ready-to-go quantitative data reports about their product usage by users for the teams. 
+The way it helps to make data-driven decisions - is by providing ready-to-go quantitative data reports about their product usage by users for the teams. Teams get visual answers on various questions about their product's elements and features usage and can make decisions based on that data.
 
-Service works similarly to Google Analytics, but aims not Marketing and Sales teams, but Product teams. It helps teams to find answers on the following quantitative questions:
+Service works similarly to Google Analytics, but aims not Marketing and Sales teams, but Product teams. This service helps teams to find answers on the following quantitative questions:
 * Do users use specified (tagged) web elements (buttons, links, check-boxes, etc.)?
 * If they do use them, then how many, how often they use each of them?
 * Which data they choose (in check-boxes, drop-downs, etc.) and how many?
@@ -31,22 +31,17 @@ Addressed answers on these questions lead to better UX both for Product teams an
 2. Open browser's dev console
 3. Change drop-down value on demo page
 
-What to expect: on each drop-down value change in console will appear new report.
+What to expect: on each drop-down value change in console will appear a new report.
 
 ## How it works
 When installed in web page (see for example [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html)), SDK listens to events from specified (tagged by `data-dtu` attribute by default) elements on web page, builds JSON reports and sends them to specified `callback` (which is `console.log` by default) function. `callback` could be a function that sends these reports to API (and this is how this SDK is used in "Do They Use" service).
 
 ## Supported elements types
-Currently [supported](/dtu_sdk.js#L6) the following elements types:
-* select-one (dropdown list)
-* datetime-local
-* button
-* link
-
-You can play with them all in a [Story Book](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_story_book.html).
+List of currently supported elements types is available [here](/dtu_sdk.js#L6).
+You can play all currently supported elements in a [Story Book](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_story_book.html).
 
 ## Story Book
-All currently supported elements are available in a [Story Book](/dtu_sdk_story_book.html) and this Book is published with GitHub Pages [here](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_story_book.html).
+All currently supported web elements are available in a [Story Book](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_story_book.html) published with GitHub Pages.
 
 ## How to install on your web-page
 1. At the bottom of your web page (right before `</body>` closing tag) import and init SDK with any `ctag` (for example, `TEST CTAG`):
@@ -58,7 +53,7 @@ All currently supported elements are available in a [Story Book](/dtu_sdk_story_
     });
   </script>
 ```
-(check out how it is done in [code of SDK demo HTML page](https://github.com/alexeyhimself/dtu_sdk_js/blob/main/dtu_sdk_js_demo.html))
+(check out how it is done in [code of SDK demo HTML page](https://github.com/alexeyhimself/dtu_sdk_js/blob/main/dtu_sdk_js_demo.html) and how it works on [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html) itself).
 
 2. Check that SDK was installed correctly. In browser's dev console execute:
 ```
@@ -68,7 +63,7 @@ Correctly installed SDK will reply:
 ```
 'Ready'
 ```
-(you can try this in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html)).
+(you can try this in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html) as well).
 
 Incorrectly installed SDK will reply with an error message related to that specific problem.
 
