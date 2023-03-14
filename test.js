@@ -77,7 +77,8 @@ const SUPPORTED_INPUT_TYPES_AND_EVENTS = imports.SUPPORTED_INPUT_TYPES_AND_EVENT
 const types_all = Object.keys(SUPPORTED_INPUT_TYPES_AND_EVENTS);
 const types_secret_or_long = ['password', 'text'];
 const types_files = ['file'];
-const types_to_exclude = types_secret_or_long.concat(types_files);
+const types_select = ['select-one', 'select-multiple'];
+const types_to_exclude = types_secret_or_long.concat(types_files).concat(types_select);
 
 let types_normal = [...types_all]; // types_normal = types_all - types_to_exclude
 for (let i in types_to_exclude) {
@@ -140,6 +141,43 @@ test.each(types_files)('SDK .form_report() method forms report for type: %s', (t
   expect(report.element).toEqual(element_name);
   expect(report.value).toEqual([1, 2]);
 });
+
+test('SDK .form_report() method forms report for type: select-one', () => {
+  let config = {...minimum_valid_config};
+  config.callback = mock_send;
+  const dtu = imports.dotheyuse(config);
+
+  const type = 'select-one';
+  let event = {};
+  event['dataset'] = {};
+  const element_name = 'some ' + type;
+  event['dataset'][dtu.dtu_attribute] = element_name;
+
+  let element = {'type': type, 'selectedOptions': [{'value': 1}]};
+  let report = dtu.form_report(element, event);
+
+  expect(report.element).toEqual(element_name);
+  expect(report.value).toEqual([1]);
+});
+
+test('SDK .form_report() method forms report for type: select-multiple', () => {
+  let config = {...minimum_valid_config};
+  config.callback = mock_send;
+  const dtu = imports.dotheyuse(config);
+
+  const type = 'select-multiple';
+  let event = {};
+  event['dataset'] = {};
+  const element_name = 'some ' + type;
+  event['dataset'][dtu.dtu_attribute] = element_name;
+
+  let element = {'type': type, 'selectedOptions': [{'value': 1}, {'value': 2}]};
+  let report = dtu.form_report(element, event);
+
+  expect(report.element).toEqual(element_name);
+  expect(report.value).toEqual([1, 2]);
+});
+
 
 test.each(['A', 'BUTTON'])('SDK .form_report() method forms value of innerText for tagName: %s', (tag) => {
   let config = {...minimum_valid_config};

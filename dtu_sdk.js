@@ -5,6 +5,7 @@ const DEFAULT_TOPIC = 'default';
 const DEFAULT_DTU_DATASET_ATTRIBUTE = "dtu";
 const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
         'select-one': ['change'],
+        'select-multiple': ['change'],
         'datetime-local': ['change'],
         'date': ['change'],
         'time': ['change'],
@@ -138,6 +139,12 @@ class DoTheyUse {
       r.value = files;
     }
 
+    if (['select-one', 'select-multiple'].includes(element.type)) {
+      const options = element.selectedOptions; // https://stackoverflow.com/questions/5866169/how-to-get-all-selected-values-of-a-multiple-select-box
+      const values = Array.from(options).map(({ value }) => value);
+      r.value = values;
+    }
+
     return r;
   }
 
@@ -156,7 +163,7 @@ class DoTheyUse {
         }
       }
       catch (error) {
-        console.error("Unsupported element:\n", element, "\n", error);
+        console.error("Unsupported element:\n", element, "\n", "element type: ", element.type, error);
         element.parentElement.parentElement.className = 'unsupported';
       }
     }
