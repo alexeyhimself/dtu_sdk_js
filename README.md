@@ -45,7 +45,7 @@ All currently supported web elements are available in a [Story Book](https://ale
 
 ## How to install on your web-page
 1. At the bottom of your web page (right before `</body>` closing tag) import and init SDK with any `ctag` (for example, `TEST CTAG`):
-```
+```html
   <script src="https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk.js"></script>
   <script type="text/javascript">
     const dtu = dotheyuse({
@@ -56,11 +56,11 @@ All currently supported web elements are available in a [Story Book](https://ale
 (check out how it is done in [code of SDK demo HTML page](https://github.com/alexeyhimself/dtu_sdk_js/blob/main/dtu_sdk_js_demo.html) and how it works on [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html) itself).
 
 2. Check that SDK was installed correctly. In browser's dev console execute:
-```
+```js
 dtu.status
 ```
 Correctly installed SDK will reply:
-```
+```js
 'Ready'
 ```
 (you can try this in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html) as well).
@@ -70,7 +70,7 @@ Incorrectly installed SDK will reply with an error message related to that speci
 ## How to use
 ### Basic usage
 1. To any (of [supported types](/dtu_sdk.js#L6)) element of your web page add `data-dtu` attribute. For example:
-```
+```html
 <select data-dtu="some dropdown">
   <option>value 1</option>
   <option>value 2</option>
@@ -85,7 +85,7 @@ You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sd
 
 ### Advanced usage
 1. Set your own `callback` (`my_custom_function`, for example) function:
-```
+```js
 <script type="text/javascript">
   const dtu = dotheyuse({
     'ctag': 'DTU CTAG',
@@ -94,7 +94,7 @@ You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sd
 </script>
 ```
 2. Disable automatic bind to elements to `listen` events
-```
+```js
 <script type="text/javascript">
   const dtu = dotheyuse({
     'ctag': 'DTU CTAG',
@@ -103,7 +103,7 @@ You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sd
 </script>
 ```
 3. Change default (`data-dtu`) bind attribute (to `data-testid` for example):
-```
+```js
 <script type="text/javascript">
   const dtu = dotheyuse({
     'ctag': 'DTU CTAG',
@@ -114,7 +114,7 @@ You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sd
 **Please note**, that `data-` preffix is omited.
 
 4. Specify `topic` explicitly:
-```
+```js
 <script type="text/javascript">
   const dtu = dotheyuse({
     'ctag': 'DTU CTAG',
@@ -126,17 +126,17 @@ You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sd
 
 ## How to run tests
 1. Install [Jest](https://jestjs.io/docs/getting-started) framework:
-```
+```bash
 npm install --save-dev jest
 ```
 2. In project directory run:
-```
+```bash
 npm test
 ```
 
 ## How to check test coverage
 1. In project directory run:
-```
+```bash
 npx jest --coverage
 ```
 2. In project directory will appear `coverage` directory with `index.html` and `dtu_sdk.js.html` files
