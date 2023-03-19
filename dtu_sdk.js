@@ -30,7 +30,7 @@ const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
         'button': ['click'],
         'submit': ['click'],
         '': ['click'], // link button in bootstrap 5 at least
-        undefined: ['click'],
+        //undefined: ['click'],
       };
 const LISTEN_TO_DEFAULT_EVENTS = true;
 const DEFAULT_CALLBACK = DTU_RX_API_submint_report_endpoint;
@@ -163,13 +163,18 @@ class DoTheyUse {
     for (let i = 0; i < dtu_this.elements_to_listen_to.length; i++) {
       const element = dtu_this.elements_to_listen_to[i];
       try {
-        const events_to_listen = dtu_this.supported_input_types_and_events[element.type];
-        for (let j = 0; j < events_to_listen.length; j++) {
-          element.addEventListener(events_to_listen[j], function (e) {
-            const event_this = this; // to distinguish event.this and dtu.this
-            let r = dtu_this.form_report(element, event_this);
-            dtu_this.send(r);
-          }, false);
+        if (dtu_this.supported_input_types_and_events[element.type]) {
+          const events_to_listen = dtu_this.supported_input_types_and_events[element.type];
+          for (let j = 0; j < events_to_listen.length; j++) {
+            element.addEventListener(events_to_listen[j], function (e) {
+              const event_this = this; // to distinguish event.this and dtu.this
+              let r = dtu_this.form_report(element, event_this);
+              dtu_this.send(r);
+            }, false);
+          }  
+        }
+        else {
+          ; // undefined type, data-dtu in element path
         }
       }
       catch (error) {
