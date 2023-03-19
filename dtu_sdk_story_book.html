@@ -20,12 +20,12 @@
       background-color: lightcoral;
     }
   </style>
-  <body>
+  <body data-dtu="story book">
     <h1>Story Book for <a href="https://github.com/alexeyhimself/dtu_sdk_js">"Do They Use" service JavaScript SDK</a></h1>
     <p>Listed all supported by JS SDK elements with their events and report samples.<br> 
       <u>Elements are interactive:</u> click and change values and see what to be sent in this case in report.</p>
     <h3>&lt;input&gt;</h3>
-    <table>
+    <table data-dtu="input table">
       <tr>
         <th>type</th>
         <th>element</th>
@@ -172,7 +172,7 @@
     </table>
     
     <h3>&lt;select&gt;</h3>
-    <table>
+    <table data-dtu="select table">
       <tr>
         <th>type</th>
         <th>element</th>
@@ -209,7 +209,7 @@
     </table>
 
     <h3>&lt;a&gt;</h3>
-    <table>
+    <table data-dtu="anchor table">
       <tr>
         <th>type</th>
         <th>element</th>
@@ -221,7 +221,7 @@
         <tr>
           <td>''</td>
           <td>
-            <a href="#" data-dtu="some link"/>some text in link</a>
+            <a href="javascript:;" data-dtu="some link"/>some text in link</a>
           </td>
           <td>click</td>
           <td>some link</td>
@@ -231,7 +231,7 @@
     </table>
 
     <h3>&lt;button&gt;</h3>
-    <table>
+    <table data-dtu="button table">
       <tr>
         <th>type</th>
         <th>element</th>
@@ -254,7 +254,7 @@
 
     <script type="text/javascript">
       function update_storybook(report) {
-        const values_to_exclude = ['ctag', 'topic', 'date_time', 'element_path'];
+        const values_to_exclude = ['ctag', 'topic', 'date_time'];
         for (let i in values_to_exclude)
           delete report[values_to_exclude[i]];
 

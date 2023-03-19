@@ -29,8 +29,8 @@ const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
         'text': ['change'],
         'button': ['click'],
         'submit': ['click'],
-        '': ['click'], // link button in bootstrap 5 at least
-        //undefined: ['click'],
+        '': ['click'], // anchor
+        undefined: [], // used for element_path indication
       };
 const LISTEN_TO_DEFAULT_EVENTS = true;
 const DEFAULT_CALLBACK = DTU_RX_API_submint_report_endpoint;
@@ -95,8 +95,6 @@ class DoTheyUse {
     if (typeof r === "object") {
       for (const [key, value] of Object.entries(r))
         this.report[key] = value
-
-      this.report.element_path = ['', r.element];
     }
 
     this.report.date_time = Date.now();
@@ -122,9 +120,22 @@ class DoTheyUse {
     this.elements_to_listen_to = document.querySelectorAll('[data-' + this.dtu_attribute + ']');
   }
 
+  get_element_path(element) {
+    let parents = [];
+    element = element.parentNode; // do not include this element in the path
+    for ( ; element && element !== document; element = element.parentNode ) { // https://gomakethings.com/how-to-get-all-parent-elements-with-vanilla-javascript/#1-get-all-parents
+      let element_data_dtu = element.getAttribute('data-dtu');
+      if (element_data_dtu)
+        parents.push(element_data_dtu);
+    }
+    return parents.reverse();
+  }
+
   form_report(element, event_this) {
     const el = event_this.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE];
     let r = {'element': el};
+
+    r['element_path'] = this.get_element_path(element);
 
     let val = undefined;
     if (['A', 'BUTTON'].includes(element.tagName))
@@ -163,19 +174,14 @@ class DoTheyUse {
     for (let i = 0; i < dtu_this.elements_to_listen_to.length; i++) {
       const element = dtu_this.elements_to_listen_to[i];
       try {
-        if (dtu_this.supported_input_types_and_events[element.type]) {
-          const events_to_listen = dtu_this.supported_input_types_and_events[element.type];
-          for (let j = 0; j < events_to_listen.length; j++) {
-            element.addEventListener(events_to_listen[j], function (e) {
-              const event_this = this; // to distinguish event.this and dtu.this
-              let r = dtu_this.form_report(element, event_this);
-              dtu_this.send(r);
-            }, false);
-          }  
-        }
-        else {
-          ; // undefined type, data-dtu in element path
-        }
+        const events_to_listen = dtu_this.supported_input_types_and_events[element.type];
+        for (let j = 0; j < events_to_listen.length; j++) {
+          element.addEventListener(events_to_listen[j], function (e) {
+            const event_this = this; // to distinguish event.this and dtu.this
+            let r = dtu_this.form_report(element, event_this);
+            dtu_this.send(r);
+          }, false);
+        }  
       }
       catch (error) {
         console.error("Unsupported element:\n", element, "\n", "element type: ", element.type, error);
