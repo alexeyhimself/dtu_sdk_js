@@ -78,7 +78,8 @@ const types_all = Object.keys(SUPPORTED_INPUT_TYPES_AND_EVENTS);
 const types_secret_or_long = ['password', 'text'];
 const types_files = ['file'];
 const types_select = ['select-one', 'select-multiple'];
-const types_to_exclude = types_secret_or_long.concat(types_files).concat(types_select);
+const types_undefined = [undefined];
+const types_to_exclude = types_secret_or_long.concat(types_files).concat(types_select).concat(types_undefined);
 
 let types_normal = [...types_all]; // types_normal = types_all - types_to_exclude
 for (let i in types_to_exclude) {
@@ -99,7 +100,8 @@ test.each(types_normal)('SDK .form_report() method works for type: %s', (type) =
   const element_value = 'unit test val';
   event['value'] = element_value;
 
-  let element = {'type': type};
+  let element = {'type': type, 'parentNode': document};
+  element.getAttribute = function (argument) {};
   let report = dtu.form_report(element, event);
 
   expect(report.element).toEqual(element_name);
@@ -119,6 +121,7 @@ test.each(types_secret_or_long)('SDK .form_report() method forms report for type
   event['value'] = element_value;
 
   let element = {'type': type};
+  element.getAttribute = function (argument) {};
   let report = dtu.form_report(element, event);
 
   expect(report.element).toEqual(element_name);
@@ -136,6 +139,7 @@ test.each(types_files)('SDK .form_report() method forms report for type: %s', (t
   event['dataset'][dtu.dtu_attribute] = element_name;
 
   let element = {'type': type, 'files': [{'name': 1}, {'name': 2}]};
+  element.getAttribute = function (argument) {};
   let report = dtu.form_report(element, event);
 
   expect(report.element).toEqual(element_name);
@@ -154,6 +158,7 @@ test('SDK .form_report() method forms report for type: select-one', () => {
   event['dataset'][dtu.dtu_attribute] = element_name;
 
   let element = {'type': type, 'selectedOptions': [{'value': 1}]};
+  element.getAttribute = function (argument) {};
   let report = dtu.form_report(element, event);
 
   expect(report.element).toEqual(element_name);
@@ -172,6 +177,7 @@ test('SDK .form_report() method forms report for type: select-multiple', () => {
   event['dataset'][dtu.dtu_attribute] = element_name;
 
   let element = {'type': type, 'selectedOptions': [{'value': 1}, {'value': 2}]};
+  element.getAttribute = function (argument) {};
   let report = dtu.form_report(element, event);
 
   expect(report.element).toEqual(element_name);
@@ -191,6 +197,7 @@ test.each(['A', 'BUTTON'])('SDK .form_report() method forms value of innerText f
   const element_value = 'unit test val';
 
   let element = {'type': undefined, 'tagName': tag, 'innerText': element_value};
+  element.getAttribute = function (argument) {};
   let report = dtu.form_report(element, event);
 
   expect(report.element).toEqual(element_name);
