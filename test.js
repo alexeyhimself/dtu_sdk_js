@@ -93,14 +93,14 @@ test.each(types_normal)('SDK .form_report() method works for type: %s', (type) =
   config.callback = mock_send;
   const dtu = imports.dotheyuse(config);
 
-  let event = {};
-  event['dataset'] = {};
-  const element_name = 'some ' + type;
-  event['dataset'][dtu.dtu_attribute] = element_name;
-  const element_value = 'unit test val';
-  event['value'] = element_value;
+  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type][0]};
 
   let element = {'type': type, 'parentNode': document};
+  element['dataset'] = {};
+  const element_name = 'some ' + type;
+  element['dataset'][dtu.dtu_attribute] = element_name;
+  const element_value = 'unit test val';
+  element['value'] = element_value;
   element.getAttribute = function (argument) {};
   let report = dtu.form_report(element, event);
 
@@ -113,14 +113,14 @@ test.each(types_secret_or_long)('SDK .form_report() method forms report for type
   config.callback = mock_send;
   const dtu = imports.dotheyuse(config);
 
-  let event = {};
-  event['dataset'] = {};
-  const element_name = 'some ' + type;
-  event['dataset'][dtu.dtu_attribute] = element_name;
-  const element_value = 'unit test val';
-  event['value'] = element_value;
+  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type][0]};
 
   let element = {'type': type};
+  element['dataset'] = {};
+  const element_name = 'some ' + type;
+  element['dataset'][dtu.dtu_attribute] = element_name;
+  const element_value = 'unit test val';
+  element['value'] = element_value;
   element.getAttribute = function (argument) {};
   let report = dtu.form_report(element, event);
 
@@ -133,12 +133,12 @@ test.each(types_files)('SDK .form_report() method forms report for type: %s', (t
   config.callback = mock_send;
   const dtu = imports.dotheyuse(config);
 
-  let event = {};
-  event['dataset'] = {};
-  const element_name = 'some ' + type;
-  event['dataset'][dtu.dtu_attribute] = element_name;
+  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type][0]};
 
   let element = {'type': type, 'files': [{'name': 1}, {'name': 2}]};
+  element['dataset'] = {};
+  const element_name = 'some ' + type;
+  element['dataset'][dtu.dtu_attribute] = element_name;
   element.getAttribute = function (argument) {};
   let report = dtu.form_report(element, event);
 
@@ -152,12 +152,12 @@ test('SDK .form_report() method forms report for type: select-one', () => {
   const dtu = imports.dotheyuse(config);
 
   const type = 'select-one';
-  let event = {};
-  event['dataset'] = {};
-  const element_name = 'some ' + type;
-  event['dataset'][dtu.dtu_attribute] = element_name;
+  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type][0]};
 
   let element = {'type': type, 'selectedOptions': [{'value': 1}]};
+  element['dataset'] = {};
+  const element_name = 'some ' + type;
+  element['dataset'][dtu.dtu_attribute] = element_name;
   element.getAttribute = function (argument) {};
   let report = dtu.form_report(element, event);
 
@@ -171,12 +171,12 @@ test('SDK .form_report() method forms report for type: select-multiple', () => {
   const dtu = imports.dotheyuse(config);
 
   const type = 'select-multiple';
-  let event = {};
-  event['dataset'] = {};
-  const element_name = 'some ' + type;
-  event['dataset'][dtu.dtu_attribute] = element_name;
-
+  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type][0]};
+  
   let element = {'type': type, 'selectedOptions': [{'value': 1}, {'value': 2}]};
+  element['dataset'] = {};
+  const element_name = 'some ' + type;
+  element['dataset'][dtu.dtu_attribute] = element_name;
   element.getAttribute = function (argument) {};
   let report = dtu.form_report(element, event);
 
@@ -190,13 +190,15 @@ test.each(['A', 'BUTTON'])('SDK .form_report() method forms value of innerText f
   config.callback = mock_send;
   const dtu = imports.dotheyuse(config);
 
-  let event = {};
-  event['dataset'] = {};
-  const element_name = 'some ' + tag;
-  event['dataset'][dtu.dtu_attribute] = element_name;
-  const element_value = 'unit test val';
+  let type = ''; // 'A' has '', 'BUTTON' has 'submit'
+  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type][0]};
 
-  let element = {'type': undefined, 'tagName': tag, 'innerText': element_value};
+  let element = {'type': type, 'tagName': tag};
+  element['dataset'] = {};
+  const element_name = 'some ' + tag;
+  element['dataset'][dtu.dtu_attribute] = element_name;
+  const element_value = 'unit test val';
+  element['innerText'] = element_value;
   element.getAttribute = function (argument) {};
   let report = dtu.form_report(element, event);
 

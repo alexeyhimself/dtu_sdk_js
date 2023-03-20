@@ -30,7 +30,7 @@ const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
         'button': ['click'],
         'submit': ['click'],
         '': ['click'], // anchor
-        undefined: [], // used for element_path indication
+        // undefined: [], // element_path indication
       };
 const LISTEN_TO_DEFAULT_EVENTS = true;
 const DEFAULT_CALLBACK = DTU_RX_API_submint_report_endpoint;
@@ -125,7 +125,14 @@ class DoTheyUse {
   }
 
   collect_dtu_elements() {
-    this.elements_to_listen_to = document.querySelectorAll('[data-' + this.dtu_attribute + ']');
+    const elements_with_data_dtu = document.querySelectorAll('[data-' + this.dtu_attribute + ']') || [];
+    let elements_to_listen_to = [];
+    for (let i in elements_with_data_dtu) {
+      let element = elements_with_data_dtu[i];
+      if (SUPPORTED_INPUT_TYPES_AND_EVENTS[element.type])
+        elements_to_listen_to.push(element);
+    }
+    this.elements_to_listen_to = elements_to_listen_to;
   }
 
   get_element_path(element) {
@@ -140,7 +147,7 @@ class DoTheyUse {
   }
 
   form_report(element, event_this) {
-    const el = event_this.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE];
+    const el = element.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE];
     let r = {'element': el};
 
     r['element_path'] = this.get_element_path(element);
@@ -149,7 +156,7 @@ class DoTheyUse {
     if (['A', 'BUTTON'].includes(element.tagName))
       val = element.innerText;
     else
-      val = event_this.value;
+      val = element.value;
 
     r.value = val;
 
@@ -174,7 +181,14 @@ class DoTheyUse {
       r.value = values;
     }
 
+    r.element_type = element.type;
+    r.event_type = event_this.type;
+
     return r;
+  }
+
+  show_this_page() {
+
   }
 
   listen() {
@@ -185,7 +199,7 @@ class DoTheyUse {
         const events_to_listen = dtu_this.supported_input_types_and_events[element.type];
         for (let j = 0; j < events_to_listen.length; j++) {
           element.addEventListener(events_to_listen[j], function (e) {
-            const event_this = this; // to distinguish event.this and dtu.this
+            const event_this = e; // to distinguish event.this and dtu.this
             let r = dtu_this.form_report(element, event_this);
             dtu_this.send(r);
           }, false);
