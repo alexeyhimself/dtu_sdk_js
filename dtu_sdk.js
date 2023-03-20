@@ -152,7 +152,7 @@ class DoTheyUse {
 
     r['element_path'] = this.get_element_path(element);
 
-    let val = undefined;
+    let val;
     if (['A', 'BUTTON'].includes(element.tagName))
       val = element.innerText;
     else
@@ -187,8 +187,14 @@ class DoTheyUse {
     return r;
   }
 
-  show_this_page() {
-
+  describe() {
+    for (let i in this.elements_to_listen_to) {
+      let element = this. elements_to_listen_to[i];
+      let event = this.supported_input_types_and_events[element.type][0];
+      let r = this.form_report(element, {'type': event});
+      this.make_report(r);
+      console.log(this.report);
+    }
   }
 
   listen() {
