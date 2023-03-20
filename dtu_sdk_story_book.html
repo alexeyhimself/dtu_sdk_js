@@ -254,7 +254,8 @@
 
     <script type="text/javascript">
       function update_storybook(report) {
-        const values_to_exclude = ['ctag', 'topic', 'date_time'];
+        const values_to_exclude = ['ctag', 'topic', 'date_time', 'url_scheme', 'url_domain_name', 'url_port', 'url_path', 'url_parameters', 'page_title'];
+        
         for (let i in values_to_exclude)
           delete report[values_to_exclude[i]];
 

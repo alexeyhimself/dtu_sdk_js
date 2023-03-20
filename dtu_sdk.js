@@ -98,6 +98,14 @@ class DoTheyUse {
     }
 
     this.report.date_time = Date.now();
+
+    this.report.url_scheme = window.location.protocol;
+    this.report.url_domain_name = window.location.hostname;
+    this.report.url_port = window.location.port;
+    this.report.url_path = window.location.pathname;
+    this.report.url_parameters = window.location.search;
+
+    this.report.page_title = document.title;
   }
 
   make_report(r) {
