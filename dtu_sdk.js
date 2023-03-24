@@ -188,13 +188,37 @@ class DoTheyUse {
   }
 
   describe() {
-    for (let i in this.elements_to_listen_to) {
-      let element = this. elements_to_listen_to[i];
+    for (let i = 0; i < this.elements_to_listen_to.length; i++) {
+      let element = this.elements_to_listen_to[i];
       let event = this.supported_input_types_and_events[element.type][0];
       let r = this.form_report(element, {'type': event});
       this.make_report(r);
-      console.log(this.report);
+
+      if (i == 0) { // only for the first element
+        console.log('On this page I see the following DTU configuration: ')
+        console.log('---------------------------------------------------')
+        console.log('ctag: ', this.report.ctag);
+        console.log('topic: ', this.report.topic);
+        let url = this.report.url_scheme 
+          + '//' 
+          + this.report.url_domain_name 
+          // + this.report.url_port
+          + this.report.url_path;
+          // + this.report.url_parameters
+
+        console.log('url: ', url);
+        console.log('page title: ', this.report.page_title);
+        console.log('');
+      }
+
+      console.log('element path:', this.report.element_path.join(' > '));
+      console.log('element type:', this.report.element_type);
+      console.log('event type:', this.report.event_type);
+      console.log('value(s):', this.report.value);
+
+      console.log('')
     }
+    console.log('Totally:', this.elements_to_listen_to.length, 'element(s)');
   }
 
   listen() {
