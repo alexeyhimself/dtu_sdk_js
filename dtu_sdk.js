@@ -130,14 +130,14 @@ class DoTheyUse {
     for (let i in elements_with_data_dtu) {
       let element = elements_with_data_dtu[i];
       if (SUPPORTED_INPUT_TYPES_AND_EVENTS[element.type]) {
-        if (this.has_no_dtu_children(element))
+        if (!this.has_dtu_children(element))
           elements_to_listen_to.push(element);
       }
     }
     this.elements_to_listen_to = elements_to_listen_to;
   }
 
-  has_no_dtu_children(element) {
+  has_dtu_children(element) {
     if (element.hasChildNodes()) {
       let em = [];
       try {
@@ -151,15 +151,15 @@ class DoTheyUse {
         let el = em[i];
         try {
           if (el.getAttribute('data-dtu'))
-            return false; // means: has dtu children
-
-          this.has_no_dtu_children(el);
+            return true;
+          if (this.has_dtu_children(el))
+            return true;
         }
         catch {}; // no getAttribute for some nodes (and they are not parents/children as well), so skip them
       }
     }
 
-    return true; // means: has no dtu children
+    return false;
   }
 
   get_element_path(element) {
