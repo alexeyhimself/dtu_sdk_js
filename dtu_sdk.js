@@ -167,21 +167,46 @@ class DoTheyUse {
     // element = element.parentNode; // do not include this element in the path
     for ( ; element && element !== document; element = element.parentNode ) { // https://gomakethings.com/how-to-get-all-parent-elements-with-vanilla-javascript/#1-get-all-parents
       let element_data_dtu = element.getAttribute('data-dtu');
-      if (element_data_dtu)
-        parents.push(element_data_dtu);
+      if (element_data_dtu !== null) {
+        if (element_data_dtu != '')
+          parents.push(element_data_dtu);
+        else {
+          if (['A', 'BUTTON'].includes(element.tagName)) {
+            parents.push(element.innerText);
+          }
+          else
+            console.error('Invalid data-dtu value for the element: ', element);
+        }
+      }
     }
     return parents.reverse();
   }
 
   form_report(element, event_this) {
+    let r = {};
     const el = element.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE];
-    let r = {'element': el};
+    if (el)
+      r.element = el;
+    else {
+      if (['A', 'BUTTON'].includes(element.tagName)) {
+        r.element = element.innerText;
+      }
+    }
 
     r['element_path'] = this.get_element_path(element);
 
+    r.element_type = element.type;
+    r.event_type = event_this.type;
+
     let val;
-    if (['A', 'BUTTON'].includes(element.tagName))
+    if ('A' == element.tagName) {
       val = element.innerText;
+      r.element_type = 'anchor'; // as type = '' for this element type
+    } 
+    else if ('BUTTON' == element.tagName) {
+      val = element.innerText;
+      r.element_type = 'button'; // as type = '' for this element type
+    }
     else
       val = element.value;
 
@@ -191,7 +216,7 @@ class DoTheyUse {
       r['checked'] = element.checked;
 
     if (['password', 'text'].includes(element.type))
-      r.value = val.length;
+      r.value = val.length; // send number of symbols rather than content
 
     if ('file' == element.type) {
       const files = [];
@@ -199,7 +224,7 @@ class DoTheyUse {
         let file_name = element.files[i].name;
         files.push(file_name);
       }
-      r.value = files;
+      r.value = files; // send file name(s) rather than files
     }
 
     if (['select-one', 'select-multiple'].includes(element.type)) {
@@ -207,9 +232,6 @@ class DoTheyUse {
       const values = Array.from(options).map(({ value }) => value);
       r.value = values;
     }
-
-    r.element_type = element.type;
-    r.event_type = event_this.type;
 
     return r;
   }
@@ -224,8 +246,8 @@ class DoTheyUse {
       if (i == 0) { // only for the first element
         console.log('On this page I see the following DTU configuration: ')
         console.log('---------------------------------------------------')
-        console.log('ctag: ', this.report.ctag);
-        console.log('topic: ', this.report.topic);
+        console.log('ctag:', this.report.ctag);
+        console.log('topic:', this.report.topic);
         let url = this.report.url_scheme 
           + '//' 
           + this.report.url_domain_name 
@@ -233,15 +255,15 @@ class DoTheyUse {
           + this.report.url_path;
           // + this.report.url_parameters
 
-        console.log('url: ', url);
-        console.log('page title: ', this.report.page_title);
+        console.log('url:', url);
+        console.log('page title:', this.report.page_title);
         console.log('');
       }
 
       console.log('element path:', this.report.element_path.join(' > '));
       console.log('element type:', this.report.element_type);
       console.log('event type:', this.report.event_type);
-      console.log('value(s):', this.report.value);
+      console.log('current value(s):', this.report.value);
 
       console.log('')
     }

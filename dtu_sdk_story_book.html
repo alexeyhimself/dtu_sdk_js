@@ -23,7 +23,7 @@
       background-color: lightcoral;
     }
   </style>
-  <body data-dtu="story book">
+  <body data-dtu="body">
     <h1>Story Book for <a href="https://github.com/alexeyhimself/dtu_sdk_js">"Do They Use" service JavaScript SDK</a></h1>
     <p>Listed all supported by JS SDK elements with their events and report samples.<br> 
       <u>Elements are interactive:</u> click and change values and see what to be sent in this case in report.</p>
@@ -219,6 +219,7 @@
         <th>listen event</th>
         <th>data-dtu attribute value in this demo</th>
         <th>element and value to be sent in a report</th>
+        <th>comment</th>
       </tr>
       <tbody>
         <tr>
@@ -229,6 +230,17 @@
           <td>click</td>
           <td>some link</td>
           <td id="some link">...</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>''</td>
+          <td>
+            <a href="javascript:;" data-dtu/>some text in link (empty data-dtu)</a>
+          </td>
+          <td>click</td>
+          <td>''</td>
+          <td id="some text in link (empty data-dtu)">...</td>
+          <td>empty data-dtu attribute forces to use element's innerText</td>
         </tr>
       </tbody>
     </table>
@@ -241,6 +253,7 @@
         <th>listen event</th>
         <th>data-dtu attribute value in this demo</th>
         <th>element and value to be sent in a report</th>
+        <th>comment</th>
       </tr>
       <tbody>
         <tr>
@@ -251,6 +264,17 @@
           <td>click</td>
           <td>some button</td>
           <td id="some button">...</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>submit</td>
+          <td>
+            <button type="submit" data-dtu/>button text (empty data-dtu)</button>
+          </td>
+          <td>click</td>
+          <td>''</td>
+          <td id="button text (empty data-dtu)">...</td>
+          <td>empty data-dtu attribute forces to use element's innerText</td>
         </tr>
       </tbody>
     </table>
