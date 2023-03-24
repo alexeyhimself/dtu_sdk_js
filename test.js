@@ -244,3 +244,10 @@ test('SDK .send() method sends "ctag" in report', () => {
   let report = dtu.send();
   expect(report.ctag).toEqual(minimum_valid_report.ctag);
 });
+
+//// describe
+test('SDK .describe() method works', () => {
+  let config = {...minimum_valid_config};
+  const dtu = imports.dotheyuse(config);
+  dtu.describe();
+});

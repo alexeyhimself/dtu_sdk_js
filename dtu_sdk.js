@@ -129,10 +129,37 @@ class DoTheyUse {
     let elements_to_listen_to = [];
     for (let i in elements_with_data_dtu) {
       let element = elements_with_data_dtu[i];
-      if (SUPPORTED_INPUT_TYPES_AND_EVENTS[element.type])
-        elements_to_listen_to.push(element);
+      if (SUPPORTED_INPUT_TYPES_AND_EVENTS[element.type]) {
+        if (this.has_no_dtu_children(element))
+          elements_to_listen_to.push(element);
+      }
     }
     this.elements_to_listen_to = elements_to_listen_to;
+  }
+
+  has_no_dtu_children(element) {
+    if (element.hasChildNodes()) {
+      let em = [];
+      try {
+        em = element.childNodes();
+      }
+      catch (error) { // TypeError childNodes is not a function for some elements like ul, ol, a, button, etc.
+        em = element.childNodes;
+      }
+      
+      for (let i = 0; i < em.length; i++) {
+        let el = em[i];
+        try {
+          if (el.getAttribute('data-dtu'))
+            return false; // means: has dtu children
+
+          this.has_no_dtu_children(el);
+        }
+        catch {}; // no getAttribute for some nodes (and they are not parents/children as well), so skip them
+      }
+    }
+
+    return true; // means: has no dtu children
   }
 
   get_element_path(element) {
