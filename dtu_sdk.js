@@ -164,7 +164,7 @@ class DoTheyUse {
 
   get_element_path(element) {
     let parents = [];
-    // element = element.parentNode; // do not include this element in the path
+    element = element.parentNode; // do not include this element in the path
     for ( ; element && element !== document; element = element.parentNode ) { // https://gomakethings.com/how-to-get-all-parent-elements-with-vanilla-javascript/#1-get-all-parents
       let element_data_dtu = element.getAttribute('data-dtu');
       if (element_data_dtu !== null) {
