@@ -207,6 +207,9 @@ class DoTheyUse {
       val = element.innerText;
       r.element_type = 'button'; // as type = '' for this element type
     }
+    else if (['UL', 'OL'].includes(element.tagName)) {
+      r.element_type = 'list'; // as type = '' for this element type
+    }
     else
       val = element.value;
 
