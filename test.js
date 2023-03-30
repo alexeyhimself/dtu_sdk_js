@@ -210,6 +210,7 @@ test('SDK .listen() method throws an error if unsupported element type', () => {
   let config = {...minimum_valid_config};
   const dtu = imports.dotheyuse(config);
   let element = {'type': 'unit test unsupported type', 'parentElement': {'parentElement': {'className': undefined}}};
+  dtu.collect_dtu_elements = function () {};
   dtu.elements_to_listen_to = [element];
   dtu.listen();
   expect(element.parentElement.parentElement.className).toEqual('unsupported');
@@ -249,5 +250,13 @@ test('SDK .send() method sends "ctag" in report', () => {
 test('SDK .describe() method works', () => {
   let config = {...minimum_valid_config};
   const dtu = imports.dotheyuse(config);
+  const type = 'text';
+  let element = {'type': type};
+  element['dataset'] = {};
+  const element_name = 'some ' + type;
+  element['dataset'][dtu.dtu_attribute] = element_name;
+  element['value'] = 'some text';
+  element.getAttribute = function (argument) {};
+  dtu.elements_to_listen_to = [element];  
   dtu.describe();
 });

@@ -54,7 +54,6 @@ class DoTheyUse {
     this.topic = config.topic || DEFAULT_TOPIC;
     this.dtu_attribute = config.dtu_attribute || DEFAULT_DTU_DATASET_ATTRIBUTE;
     this.callback = config.callback || DEFAULT_CALLBACK;
-    this.collect_dtu_elements();
 
     if ([true, false].includes(config.listen))
       this.listen_default_events = config.listen;
@@ -127,11 +126,17 @@ class DoTheyUse {
   collect_dtu_elements() {
     const elements_with_data_dtu = document.querySelectorAll('[data-' + this.dtu_attribute + ']') || [];
     let elements_to_listen_to = [];
-    for (let i in elements_with_data_dtu) {
+    for (let i = 0; i < elements_with_data_dtu.length; i++) {
       let element = elements_with_data_dtu[i];
       if (SUPPORTED_INPUT_TYPES_AND_EVENTS[element.type]) {
         if (!this.has_dtu_children(element))
           elements_to_listen_to.push(element);
+      }
+      else {
+        if (!this.has_dtu_children(element)) {
+          console.error("Unsupported element tagged with data-dtu attribute:\n", element, "\n", "element type:", element.type, "\n", "data-dtu value:", element.dataset.dtu);
+          element.parentElement.parentElement.className = 'unsupported'; // for story book highlight and for auto test
+        }
       }
     }
     this.elements_to_listen_to = elements_to_listen_to;
@@ -150,7 +155,7 @@ class DoTheyUse {
       for (let i = 0; i < em.length; i++) {
         let el = em[i];
         try {
-          if (el.getAttribute('data-dtu'))
+          if (![undefined, null].includes(el.getAttribute('data-dtu')))
             return true;
           if (this.has_dtu_children(el))
             return true;
@@ -275,28 +280,49 @@ class DoTheyUse {
 
   listen() {
     const dtu_this = this;
+    dtu_this.collect_dtu_elements();
     for (let i = 0; i < dtu_this.elements_to_listen_to.length; i++) {
       const element = dtu_this.elements_to_listen_to[i];
       try {
         const events_to_listen = dtu_this.supported_input_types_and_events[element.type];
         for (let j = 0; j < events_to_listen.length; j++) {
+          // Prevention of adding listener to an element which is already being listened:
+          // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
+          if (element.getAttribute("dtu-listened"))
+            continue;
+
           element.addEventListener(events_to_listen[j], function (e) {
             const event_this = e; // to distinguish event.this and dtu.this
             let r = dtu_this.form_report(element, event_this);
             dtu_this.send(r);
           }, false);
+
+          // When dtu.listen() is called in order not to listen again already listened elements
+          // and due to no standard in-browser way of knowing if element has any listeners:
+          // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
+          // we add attribute which will allow prevention of listening again:
+          element.setAttribute("dtu-listened", true);
         }  
       }
       catch (error) {
         console.error("Unsupported element:\n", element, "\n", "element type: ", element.type, error);
-        element.parentElement.parentElement.className = 'unsupported';
+        element.parentElement.parentElement.className = 'unsupported'; // for story book highlight and for auto test
       }
     }
   }
 }
 
 function dotheyuse(config) {
-  return new DoTheyUse(config);
+  const dtu = new DoTheyUse(config);
+
+  // Due to DOM changes and adding/removing elements we need to track DOM mutations
+  // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+  // and add new listeners if it's needed
+  const cfg = { attributes: false, childList: true, subtree: true };
+  const observer = new MutationObserver(() => { dtu.listen(); });
+  observer.observe(document, cfg);
+
+  return dtu;
 }
 
 try { // for jest unit tests
