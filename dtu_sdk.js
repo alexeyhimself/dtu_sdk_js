@@ -187,7 +187,7 @@ class DoTheyUse {
     return parents.reverse();
   }
 
-  form_report(element, event_this) {
+  form_report(element, event_type) {
     let r = {};
     const el = element.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE];
     if (el)
@@ -201,7 +201,7 @@ class DoTheyUse {
     r['element_path'] = this.get_element_path(element);
 
     r.element_type = element.type;
-    r.event_type = event_this.type;
+    r.event_type = event_type;
 
     let val;
     if ('A' == element.tagName) {
@@ -248,7 +248,7 @@ class DoTheyUse {
     for (let i = 0; i < this.elements_to_listen_to.length; i++) {
       let element = this.elements_to_listen_to[i];
       let event = this.supported_input_types_and_events[element.type][0];
-      let r = this.form_report(element, {'type': event});
+      let r = this.form_report(element, event);
       this.make_report(r);
 
       if (i == 0) { // only for the first element
@@ -293,7 +293,7 @@ class DoTheyUse {
 
           element.addEventListener(events_to_listen[j], function (e) {
             const event_this = e; // to distinguish event.this and dtu.this
-            let r = dtu_this.form_report(element, event_this);
+            let r = dtu_this.form_report(element, event_this.type);
             dtu_this.send(r);
           }, false);
 
