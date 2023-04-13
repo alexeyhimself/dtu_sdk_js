@@ -112,6 +112,7 @@ class DoTheyUse {
     this.report = {};
     this.report.ctag = this.ctag;
     this.report.topic = this.topic;
+    this.report.uid = this.uid;
   }
 
   enrich_report(r) {
@@ -142,7 +143,7 @@ class DoTheyUse {
     return this.callback(json_report);
   }
 
-  send(r) {
+  send_report(r) {
     this.make_report(r);
     return this.send_report_to_dtu_api();
   }
@@ -211,7 +212,7 @@ class DoTheyUse {
     return parents.reverse();
   }
 
-  form_report(element, event_type) {
+  process_element_event(element, event_type) {
     let r = {};
     const el = element.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE];
     if (el)
@@ -272,7 +273,7 @@ class DoTheyUse {
     for (let i = 0; i < this.elements_to_listen_to.length; i++) {
       let element = this.elements_to_listen_to[i];
       let event = this.supported_input_types_and_events[element.type][0];
-      let r = this.form_report(element, event);
+      let r = this.process_element_event(element, event);
       this.make_report(r);
 
       if (i == 0) { // only for the first element
@@ -280,6 +281,7 @@ class DoTheyUse {
         console.log('---------------------------------------------------')
         console.log('ctag:', this.report.ctag);
         console.log('topic:', this.report.topic);
+        console.log('uid:', this.report.uid);
         let url = this.report.url_scheme 
           + '//' 
           + this.report.url_domain_name 
@@ -317,8 +319,8 @@ class DoTheyUse {
 
           element.addEventListener(events_to_listen[j], function (e) {
             const event_this = e; // to distinguish event.this and dtu.this
-            let r = dtu_this.form_report(element, event_this.type);
-            dtu_this.send(r);
+            let r = dtu_this.process_element_event(element, event_this.type);
+            dtu_this.send_report(r);
           }, false);
 
           // When dtu.listen() is called in order not to listen again already listened elements

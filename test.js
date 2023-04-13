@@ -102,7 +102,7 @@ test.each(types_normal)('SDK .form_report() method works for type: %s', (type) =
   const element_value = 'unit test val';
   element['value'] = element_value;
   element.getAttribute = function (argument) {};
-  let report = dtu.form_report(element, event);
+  let report = dtu.process_element_event(element, event);
 
   expect(report.element).toEqual(element_name);
   expect(report.value).toEqual(element_value);
@@ -122,7 +122,7 @@ test.each(types_secret_or_long)('SDK .form_report() method forms report for type
   const element_value = 'unit test val';
   element['value'] = element_value;
   element.getAttribute = function (argument) {};
-  let report = dtu.form_report(element, event);
+  let report = dtu.process_element_event(element, event);
 
   expect(report.element).toEqual(element_name);
   expect(report.value).toEqual(element_value.length);
@@ -140,7 +140,7 @@ test.each(types_files)('SDK .form_report() method forms report for type: %s', (t
   const element_name = 'some ' + type;
   element['dataset'][dtu.dtu_attribute] = element_name;
   element.getAttribute = function (argument) {};
-  let report = dtu.form_report(element, event);
+  let report = dtu.process_element_event(element, event);
 
   expect(report.element).toEqual(element_name);
   expect(report.value).toEqual([1, 2]);
@@ -159,7 +159,7 @@ test('SDK .form_report() method forms report for type: select-one', () => {
   const element_name = 'some ' + type;
   element['dataset'][dtu.dtu_attribute] = element_name;
   element.getAttribute = function (argument) {};
-  let report = dtu.form_report(element, event);
+  let report = dtu.process_element_event(element, event);
 
   expect(report.element).toEqual(element_name);
   expect(report.value).toEqual([1]);
@@ -178,7 +178,7 @@ test('SDK .form_report() method forms report for type: select-multiple', () => {
   const element_name = 'some ' + type;
   element['dataset'][dtu.dtu_attribute] = element_name;
   element.getAttribute = function (argument) {};
-  let report = dtu.form_report(element, event);
+  let report = dtu.process_element_event(element, event);
 
   expect(report.element).toEqual(element_name);
   expect(report.value).toEqual([1, 2]);
@@ -200,7 +200,7 @@ test.each(['A', 'BUTTON'])('SDK .form_report() method forms value of innerText f
   const element_value = 'unit test val';
   element['innerText'] = element_value;
   element.getAttribute = function (argument) {};
-  let report = dtu.form_report(element, event);
+  let report = dtu.process_element_event(element, event);
 
   expect(report.element).toEqual(element_name);
   expect(report.value).toEqual(element_value);
@@ -222,7 +222,7 @@ test('SDK .send() method sends "ctag" in report', () => {
   let config = {...minimum_valid_config};
   config.callback = mock_send;
   const dtu = imports.dotheyuse(config);
-  let report = dtu.send();
+  let report = dtu.send_report();
   expect(report.ctag).toEqual(minimum_valid_report.ctag);
 });
 
@@ -232,7 +232,7 @@ test('SDK .send("element", "value") method sends "element" and "value" in report
   const dtu = imports.dotheyuse(config);
   const el = 'some element';
   const val = 'some value';
-  let report = dtu.send({'element': el, 'value': val});
+  let report = dtu.send_report({'element': el, 'value': val});
   expect(report.element).toEqual(el);
   expect(report.value).toEqual(val);
 });
@@ -242,7 +242,7 @@ test('SDK .send() method sends "ctag" in report', () => {
   let config = {...minimum_valid_config};
   config.callback = mock_send;
   const dtu = imports.dotheyuse(config);
-  let report = dtu.send();
+  let report = dtu.send_report();
   expect(report.ctag).toEqual(minimum_valid_report.ctag);
 });
 
