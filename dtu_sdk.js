@@ -54,6 +54,7 @@ class DoTheyUse {
     this.topic = config.topic || DEFAULT_TOPIC;
     this.dtu_attribute = config.dtu_attribute || DEFAULT_DTU_DATASET_ATTRIBUTE;
     this.callback = config.callback || DEFAULT_CALLBACK;
+    this.uid = this.get_synthetic_uid();
 
     if ([true, false].includes(config.listen))
       this.listen_default_events = config.listen;
@@ -64,6 +65,29 @@ class DoTheyUse {
       this.listen();
 
     this.status = STATUS_READY;
+  }
+
+  set_uid(uid) {
+    this.uid = uid;
+    localStorage.removeItem('synthetic_uid');
+  }
+
+  get_uid() {
+    return this.uid;
+  }
+
+  create_synthetic_uid() {
+    const uid = Date.now(new Date()); // timestamp as unique UID
+    localStorage.setItem('synthetic_uid', uid);
+    return uid;
+  }
+
+  get_synthetic_uid() {
+    const uid = localStorage.getItem('synthetic_uid');
+    if (uid)
+      return uid;
+
+    return this.create_synthetic_uid();
   }
 
   config_is_valid(config) {
