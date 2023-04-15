@@ -78,7 +78,7 @@ class DoTheyUse {
 
   create_synthetic_uid() {
     const uid = Date.now(new Date()); // timestamp as unique UID
-    localStorage.setItem('synthetic_uid', uid);
+    localStorage.setItem('synthetic_uid', Math.floor(uid / 1000)); // UID in seconds to make it shorter
     return uid;
   }
 
