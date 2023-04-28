@@ -279,6 +279,30 @@
       </tbody>
     </table>
 
+    <h3>&lt;textarea&gt;</h3>
+    <table data-dtu="textarea table">
+      <tr>
+        <th>type</th>
+        <th>element</th>
+        <th>listen event</th>
+        <th>data-dtu attribute value in this demo</th>
+        <th>element and value to be sent in a report</th>
+        <th>comment</th>
+      </tr>
+      <tbody>
+        <tr>
+          <td>''</td>
+          <td>
+            <textarea data-dtu="some textarea"/>textarea text</textarea>
+          </td>
+          <td>change</td>
+          <td>some textarea</td>
+          <td id="some textarea">...</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
     <script type="text/javascript">
       function update_storybook(report) {
         const values_to_exclude = ['ctag', 'topic', 'uid', 'date_time', 'url_scheme', 'url_domain_name', 'url_port', 'url_path', 'url_parameters', 'page_title', 'element_type', 'event_type'];

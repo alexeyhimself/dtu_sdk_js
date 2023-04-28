@@ -75,7 +75,7 @@ test('SDK does not listen if it has status "Not ready"', () => {
 // form report
 const SUPPORTED_INPUT_TYPES_AND_EVENTS = imports.SUPPORTED_INPUT_TYPES_AND_EVENTS;
 const types_all = Object.keys(SUPPORTED_INPUT_TYPES_AND_EVENTS);
-const types_secret_or_long = ['password', 'text'];
+const types_secret_or_long = ['password', 'text', 'textarea'];
 const types_files = ['file'];
 const types_select = ['select-one', 'select-multiple'];
 const types_undefined = [undefined];
