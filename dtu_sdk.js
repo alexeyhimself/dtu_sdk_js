@@ -29,6 +29,7 @@ const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
         'text': ['change'],
         'button': ['click'],
         'submit': ['click'],
+        'textarea': ['change'],
         '': ['click'], // anchor
         // undefined: [], // element_path indication
       };
@@ -161,7 +162,7 @@ class DoTheyUse {
       else {
         if (!this.has_dtu_children(element)) {
           console.error("Unsupported element tagged with data-dtu attribute:\n", element, "\n", "element type:", element.type, "\n", "data-dtu value:", element.dataset.dtu);
-          element.parentElement.parentElement.className = 'unsupported'; // for story book highlight and for auto test
+          element.parentElement.parentElement.classList.add("unsupported"); // for story book highlight and for auto test
         }
       }
     }
@@ -249,7 +250,7 @@ class DoTheyUse {
     if (['checkbox', 'radio'].includes(element.type))
       r['checked'] = element.checked;
 
-    if (['password', 'text'].includes(element.type))
+    if (['password', 'text', 'textarea'].includes(element.type))
       r.value = val.length; // send number of symbols rather than content
 
     if ('file' == element.type) {
