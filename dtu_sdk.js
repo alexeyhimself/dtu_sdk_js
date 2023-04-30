@@ -39,6 +39,7 @@ const DEFAULT_PROBLEM_DESCRIPTION = '';
 const STATUS_NOT_READY = 'Not ready. See problem description above';
 const STATUS_READY = 'Ready';
 const DEFAULT_UGID = ['Visitor'];
+const DEFAULT_UID = 'you@example.com';
 
 
 class DoTheyUse {
@@ -89,10 +90,8 @@ class DoTheyUse {
   }
 
   create_synthetic_uid() {
-    const uid_ms = Date.now(new Date()); // timestamp as unique UID
-    const uid_s = Math.floor(uid_ms / 1000); // UID in seconds to make it shorter
-    localStorage.setItem('synthetic_uid', uid_s); 
-    return uid_s;
+    localStorage.setItem('synthetic_uid', DEFAULT_UID); 
+    return DEFAULT_UID;
   }
 
   create_synthetic_ugid() {
@@ -102,7 +101,7 @@ class DoTheyUse {
 
   get_synthetic_uid() {
     const uid = localStorage.getItem('synthetic_uid');
-    if (uid)
+    if (uid == DEFAULT_UID)
       return uid;
 
     return this.create_synthetic_uid();
