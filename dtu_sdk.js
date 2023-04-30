@@ -38,6 +38,7 @@ const DEFAULT_CALLBACK = DTU_RX_API_submint_report_endpoint;
 const DEFAULT_PROBLEM_DESCRIPTION = '';
 const STATUS_NOT_READY = 'Not ready. See problem description above';
 const STATUS_READY = 'Ready';
+const DEFAULT_UGID = ['Visitor'];
 
 
 class DoTheyUse {
@@ -56,6 +57,7 @@ class DoTheyUse {
     this.dtu_attribute = config.dtu_attribute || DEFAULT_DTU_DATASET_ATTRIBUTE;
     this.callback = config.callback || DEFAULT_CALLBACK;
     this.uid = this.get_synthetic_uid();
+    this.ugid = this.get_synthetic_ugid();
 
     if ([true, false].includes(config.listen))
       this.listen_default_events = config.listen;
@@ -73,8 +75,17 @@ class DoTheyUse {
     localStorage.removeItem('synthetic_uid');
   }
 
+  set_ugid(ugid) {
+    this.ugid = ugid;
+    localStorage.removeItem('synthetic_ugid');
+  }
+
   get_uid() {
     return this.uid;
+  }
+
+  get_ugid() {
+    return this.ugid;
   }
 
   create_synthetic_uid() {
@@ -84,12 +95,25 @@ class DoTheyUse {
     return uid_s;
   }
 
+  create_synthetic_ugid() {
+    localStorage.setItem('synthetic_ugid', JSON.stringify(DEFAULT_UGID)); 
+    return DEFAULT_UGID;
+  }
+
   get_synthetic_uid() {
     const uid = localStorage.getItem('synthetic_uid');
     if (uid)
       return uid;
 
     return this.create_synthetic_uid();
+  }
+
+  get_synthetic_ugid() {
+    const ugid = localStorage.getItem('synthetic_ugid');
+    if (ugid)
+      return ugid;
+
+    return this.create_synthetic_ugid();
   }
 
   config_is_valid(config) {
@@ -115,6 +139,7 @@ class DoTheyUse {
     this.report.ctag = this.ctag;
     this.report.topic = this.topic;
     this.report.uid = this.uid;
+    this.report.ugid = this.ugid;
   }
 
   enrich_report(r) {
