@@ -4,11 +4,14 @@
 // To prettify setups of SDK in demos and instructions:
 // * if DTU_RX_API_submint_report_endpoint is undefined by previous imports, set it to 'console.log' (as it has been before this code)
 // * this DEFAULT_CALLBACK value still could be reset with DoTheyUse(config.callback) initialization
-// So, nothing changes, but setup instructions get more nice. 
-// And in future this endpoint will exist (will be set) for the REST RX API requests.
+// So, nothing changes, but setup instructions get more nice.
 if (typeof DTU_RX_API_submint_report_endpoint === 'undefined') {
   console.warn("DTU_RX_API_submint_report_endpoint is undefined. Setting 'console.log' as DEFAULT_CALLBACK");
   DTU_RX_API_submint_report_endpoint = console.log;
+}
+if (typeof DTU_RX_API_submint_report === 'undefined') {
+  console.warn("DTU_RX_API_submint_report is undefined. Setting 'console.log' as DEFAULT_CALLBACK");
+  DTU_RX_API_submint_report = console.log;
 }
 
 const DEFAULT_TOPIC = 'default';
@@ -34,7 +37,11 @@ const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
         // undefined: [], // element_path indication
       };
 const LISTEN_TO_DEFAULT_EVENTS = true;
-const DEFAULT_CALLBACK = DTU_RX_API_submint_report_endpoint;
+let DEFAULT_CALLBACK = DTU_RX_API_submint_report_endpoint;
+if ("localhost" == window.location.hostname)  {
+  DEFAULT_CALLBACK = DTU_RX_API_submint_report;
+}
+
 const DEFAULT_PROBLEM_DESCRIPTION = '';
 const STATUS_NOT_READY = 'Not ready. See problem description above';
 const STATUS_READY = 'Ready';
