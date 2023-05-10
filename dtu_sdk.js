@@ -9,10 +9,31 @@ if (typeof DTU_RX_API_submint_report_endpoint === 'undefined') {
   console.warn("DTU_RX_API_submint_report_endpoint is undefined. Setting 'console.log' as DEFAULT_CALLBACK");
   DTU_RX_API_submint_report_endpoint = console.log;
 }
-if (typeof DTU_RX_API_submint_report === 'undefined') {
-  console.warn("DTU_RX_API_submint_report is undefined. Setting 'console.log' as DEFAULT_CALLBACK");
-  DTU_RX_API_submint_report = console.log;
+
+async function DTU_RX_API_submint_report(report) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+  report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
+  delete report.ugid // temporary disabled
+  const response = await fetch('http://localhost/api/submit', { // default options are marked with *
+    method: "POST",
+    mode: "no-cors", // no-cors, *cors, same-origin
+    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: "include", // include, *same-origin, omit
+    headers: {
+      //"Content-Type": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    redirect: "follow", // manual, *follow, error
+    referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    body: JSON.stringify(report), // body data type must match "Content-Type" header
+  });
+  return response.json(); // parses JSON response into native JavaScript objects
 }
+
+/*
+postData("https://example.com/answer", { answer: 42 }).then((data) => {
+  console.log(data); // JSON data parsed by `data.json()` call
+});
+*/
 
 const DEFAULT_TOPIC = 'default';
 const DEFAULT_DTU_DATASET_ATTRIBUTE = "dtu";
