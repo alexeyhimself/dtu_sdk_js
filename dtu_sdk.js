@@ -12,6 +12,7 @@ if (typeof DTU_RX_API_submint_report_endpoint === 'undefined') {
 
 async function DTU_RX_API_submint_report(report) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
+  report['value'] = String(report['value']);
   delete report.ugid // temporary disabled
   const response = await fetch('http://localhost/api/submit', { // default options are marked with *
     method: "POST",
