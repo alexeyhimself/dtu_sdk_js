@@ -305,7 +305,7 @@
 
     <script type="text/javascript">
       function update_storybook(report) {
-        const values_to_exclude = ['ctag', 'topic', 'uid', 'ugid', 'date_time', 'url_scheme', 'url_domain_name', 'url_port', 'url_path', 'url_parameters', 'page_title', 'element_type', 'event_type'];
+        const values_to_exclude = ['ctag', 'topic', 'uid', 'ugid', 'date_time', 'url_scheme', 'url_domain_name', 'url_port', 'url_path', 'url_parameters', 'page_title', 'element_type', 'event_type']; // this exclude - is just to display more meaningful items in story book table
         
         for (let i in values_to_exclude)
           delete report[values_to_exclude[i]];

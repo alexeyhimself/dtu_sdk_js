@@ -10,11 +10,11 @@ if (typeof DTU_RX_API_submint_report_endpoint === 'undefined') {
   DTU_RX_API_submint_report_endpoint = console.log;
 }
 
-async function DTU_RX_API_submint_report(report) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
   report['value'] = String(report['value']);
   delete report.ugid // temporary disabled
-  const response = await fetch('http://localhost/api/submit', { // default options are marked with *
+  const response = await fetch(api_url + '/api/submit', { // default options are marked with *
     method: "POST",
     mode: "no-cors", // no-cors, *cors, same-origin
     cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
@@ -30,14 +30,10 @@ async function DTU_RX_API_submint_report(report) { // https://developer.mozilla.
   //return response.json(); // parses JSON response into native JavaScript objects // causes u_sdk.js?v=10:29 Uncaught (in promise) SyntaxError: Unexpected end of input (at d.. due to no-cors
 }
 
-/*
-postData("https://example.com/answer", { answer: 42 }).then((data) => {
-  console.log(data); // JSON data parsed by `data.json()` call
-});
-*/
-
+const DEFAULT_CTAG = 'DEMO MVP';
 const DEFAULT_TOPIC = 'default';
 const DEFAULT_DTU_DATASET_ATTRIBUTE = "dtu";
+const DEFAULT_API_URL = 'http://localhost';
 const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
         'select-one': ['change'],
         'select-multiple': ['change'],
@@ -59,10 +55,10 @@ const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
         // undefined: [], // element_path indication
       };
 const LISTEN_TO_DEFAULT_EVENTS = true;
-let DEFAULT_CALLBACK = DTU_RX_API_submint_report_endpoint;
-if ("localhost" == window.location.hostname)  {
-  DEFAULT_CALLBACK = DTU_RX_API_submint_report;
-}
+
+let DEFAULT_CALLBACK = DTU_RX_API_submint_report;
+if (['', 'dotheyuse.com'].includes(window.location.hostname))
+  DEFAULT_CALLBACK = DTU_RX_API_submint_report_endpoint;
 
 const DEFAULT_PROBLEM_DESCRIPTION = '';
 const STATUS_NOT_READY = 'Not ready. See problem description above';
@@ -82,9 +78,10 @@ class DoTheyUse {
       return;
     }
 
-    this.ctag = config.ctag;
+    this.ctag = config.ctag || DEFAULT_CTAG;
     this.topic = config.topic || DEFAULT_TOPIC;
     this.dtu_attribute = config.dtu_attribute || DEFAULT_DTU_DATASET_ATTRIBUTE;
+    this.api_url = config.api_url || DEFAULT_API_URL;
     this.callback = config.callback || DEFAULT_CALLBACK;
     this.uid = this.get_synthetic_uid();
     this.ugid = this.get_synthetic_ugid();
@@ -193,9 +190,7 @@ class DoTheyUse {
   }
 
   send_report_to_dtu_api() {
-    // const json_report = JSON.stringify(this.report); // stringify before sending as payload
-    const json_report = this.report; // till no real networking - no stringify as well to save CPU time
-    return this.callback(json_report);
+    return this.callback(this.report, this.api_url);
   }
 
   send_report(r) {
