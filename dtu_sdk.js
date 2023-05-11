@@ -2,13 +2,17 @@
 //const events = "click focus blur keydown change dblclick keydown keyup keypress textInput touchstart touchmove touchend touchcancel resize scroll zoom select change submit reset".split(" ");
 
 // To prettify setups of SDK in demos and instructions:
-// * if DTU_RX_API_submint_report_endpoint is undefined by previous imports, set it to 'console.log' (as it has been before this code)
+// * if DTU_RX_API_submint_report_simulation is undefined by previous imports, set it to 'console.log' (as it has been before this code)
 // * this DEFAULT_CALLBACK value still could be reset with DoTheyUse(config.callback) initialization
 // So, nothing changes, but setup instructions get more nice.
-if (typeof DTU_RX_API_submint_report_endpoint === 'undefined') {
-  console.warn("DTU_RX_API_submint_report_endpoint is undefined. Setting 'console.log' as DEFAULT_CALLBACK");
-  DTU_RX_API_submint_report_endpoint = console.log;
+if (typeof DTU_RX_API_submint_report_simulation === 'undefined') {
+  console.warn("DTU_RX_API_submint_report_simulation is undefined. Setting 'console.log' as DEFAULT_CALLBACK");
+  DTU_RX_API_submint_report_simulation = console.log;
 }
+
+let REAL_OPERATION = true;
+if (['', 'dotheyuse.com'].includes(window.location.hostname))
+  REAL_OPERATION = false;
 
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
@@ -56,15 +60,19 @@ const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
       };
 const LISTEN_TO_DEFAULT_EVENTS = true;
 
-let DEFAULT_CALLBACK = DTU_RX_API_submint_report;
-if (['', 'dotheyuse.com'].includes(window.location.hostname))
-  DEFAULT_CALLBACK = DTU_RX_API_submint_report_endpoint;
+let DEFAULT_CALLBACK = DTU_RX_API_submint_report_simulation;
+let DEFAULT_UID = 'you@example.com';
+if (REAL_OPERATION) {
+  DEFAULT_CALLBACK = DTU_RX_API_submint_report;
+  const uid_ms = Date.now(new Date()); // timestamp as unique UID
+  const uid_s = Math.floor(uid_ms / 1000); // UID in seconds to make it shorter
+  DEFAULT_UID = uid_s;
+}
 
 const DEFAULT_PROBLEM_DESCRIPTION = '';
 const STATUS_NOT_READY = 'Not ready. See problem description above';
 const STATUS_READY = 'Ready';
 const DEFAULT_UGID = ['Visitor'];
-const DEFAULT_UID = 'you@example.com';
 
 
 class DoTheyUse {
@@ -127,7 +135,7 @@ class DoTheyUse {
 
   get_synthetic_uid() {
     const uid = localStorage.getItem('synthetic_uid');
-    if (uid == DEFAULT_UID)
+    if (uid)
       return uid;
 
     return this.create_synthetic_uid();
