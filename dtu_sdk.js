@@ -144,7 +144,7 @@ class DoTheyUse {
   get_synthetic_ugid() {
     const ugid = localStorage.getItem('synthetic_ugid');
     if (ugid)
-      return ugid;
+      return JSON.parse(ugid);
 
     return this.create_synthetic_ugid();
   }
