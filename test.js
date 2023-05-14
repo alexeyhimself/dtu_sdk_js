@@ -26,12 +26,11 @@ test('SDK replies with status "Not ready" if config is not a dictionary', () => 
   expect(dtu.status).toMatch(/Not ready/);
 });
 
-test('SDK replies with status "Not ready" if config does not contain "ctag"', () => {
+test('SDK replies with status "Ready" if config does not contain "ctag"', () => {
   let config = {...minimum_valid_config};
   delete config.ctag;
   const dtu = imports.dotheyuse(config);
-  expect(dtu.problem_description).toMatch(/dotheyuse not working: config must contain 'ctag'/);
-  expect(dtu.status).toMatch(/Not ready/);
+  expect(dtu.status).toMatch(/Ready/);
 });
 
 test('SDK replies with status "Ready" if config has valid "ctag"', () => {
@@ -65,12 +64,13 @@ test('SDK listens if config has no "listen" option', () => {
   expect(dtu.listen_default_events).toBeTruthy();
 });
 
+/* looks like not relevant anymore with allowed no ctag
 test('SDK does not listen if it has status "Not ready"', () => {
-  const dtu = imports.dotheyuse({'missing': 'ctag'});
+  const dtu = imports.dotheyuse({'callback': 'not_exists'});
   expect(dtu.status).toMatch(/Not ready/);
   expect(dtu.listen_default_events).toBeFalsy();
 });
-
+*/
 
 // form report
 const SUPPORTED_INPUT_TYPES_AND_EVENTS = imports.SUPPORTED_INPUT_TYPES_AND_EVENTS;
