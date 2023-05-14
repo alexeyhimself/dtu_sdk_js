@@ -17,7 +17,8 @@ if (['', 'dotheyuse.com'].includes(window.location.hostname))
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
   report['value'] = String(report['value']);
-  delete report.ugid // temporary disabled
+  report['ugids'] = String(report['ugids']);
+  //console.log(report)
   const response = await fetch(api_url + '/api/submit', { // default options are marked with *
     method: "POST",
     mode: "no-cors", // no-cors, *cors, same-origin
@@ -72,7 +73,7 @@ if (REAL_OPERATION) {
 const DEFAULT_PROBLEM_DESCRIPTION = '';
 const STATUS_NOT_READY = 'Not ready. See problem description above';
 const STATUS_READY = 'Ready';
-const DEFAULT_UGID = ['Visitor'];
+const DEFAULT_UGIDS = ['Visitor'];
 
 
 class DoTheyUse {
@@ -92,7 +93,7 @@ class DoTheyUse {
     this.api_url = config.api_url || DEFAULT_API_URL;
     this.callback = config.callback || DEFAULT_CALLBACK;
     this.uid = this.get_synthetic_uid();
-    this.ugid = this.get_synthetic_ugid();
+    this.ugids = this.get_synthetic_ugids();
 
     if ([true, false].includes(config.listen))
       this.listen_default_events = config.listen;
@@ -110,17 +111,17 @@ class DoTheyUse {
     localStorage.removeItem('synthetic_uid');
   }
 
-  set_ugid(ugid) {
-    this.ugid = ugid;
-    localStorage.removeItem('synthetic_ugid');
+  set_ugids(ugids) {
+    this.ugids = ugids;
+    localStorage.removeItem('synthetic_ugids');
   }
 
   get_uid() {
     return this.uid;
   }
 
-  get_ugid() {
-    return this.ugid;
+  get_ugids() {
+    return this.ugids;
   }
 
   create_synthetic_uid() {
@@ -128,9 +129,9 @@ class DoTheyUse {
     return DEFAULT_UID;
   }
 
-  create_synthetic_ugid() {
-    localStorage.setItem('synthetic_ugid', JSON.stringify(DEFAULT_UGID)); 
-    return DEFAULT_UGID;
+  create_synthetic_ugids() {
+    localStorage.setItem('synthetic_ugids', JSON.stringify(DEFAULT_UGIDS)); 
+    return DEFAULT_UGIDS;
   }
 
   get_synthetic_uid() {
@@ -141,12 +142,12 @@ class DoTheyUse {
     return this.create_synthetic_uid();
   }
 
-  get_synthetic_ugid() {
-    const ugid = localStorage.getItem('synthetic_ugid');
-    if (ugid)
-      return JSON.parse(ugid);
+  get_synthetic_ugids() {
+    const ugids = localStorage.getItem('synthetic_ugids');
+    if (ugids)
+      return JSON.parse(ugids);
 
-    return this.create_synthetic_ugid();
+    return this.create_synthetic_ugids();
   }
 
   config_is_valid(config) {
@@ -168,7 +169,7 @@ class DoTheyUse {
     this.report.ctag = this.ctag;
     this.report.topic = this.topic;
     this.report.uid = this.uid;
-    this.report.ugid = this.ugid;
+    this.report.ugids = this.ugids;
   }
 
   enrich_report(r) {
