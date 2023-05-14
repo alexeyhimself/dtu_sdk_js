@@ -158,10 +158,6 @@ class DoTheyUse {
       this.problem_description = "dotheyuse not working: config must be a dictionary, but given a: " + typeof(config);
       return false;
     }
-    else if (!config.ctag) {
-      this.problem_description = "dotheyuse not working: config must contain 'ctag'. ";
-      return false;
-    }
     else {
       return true;
     }
