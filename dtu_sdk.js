@@ -191,7 +191,7 @@ class DoTheyUse {
     this.report.url_path = window.location.pathname;
     this.report.url_parameters = window.location.search;
 
-    this.report.page_title = document.title;
+    //this.report.page_title = document.title;
   }
 
   make_report(r) {
