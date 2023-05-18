@@ -8,11 +8,13 @@ if (['--', 'dotheyuse.com'].includes(window.location.hostname))
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
   //console.warn('Fix values multiselect')
-  let val = report['value'][0].replaceAll('\'', '"');
-  //console.warn('Fix values parsing')
-  if (val[0] == '[')
-    val = JSON.parse(val);
-  report['value'] = String(val);
+  if (report['value']) {
+    let val = report['value'][0].replaceAll('\'', '"');
+    //console.warn('Fix values parsing')
+    if (val[0] == '[')
+      val = JSON.parse(val);
+    report['value'] = String(val);  
+  }
   report['ugids'] = String(report['ugids']);
   //console.log(report)
   const response = await fetch(api_url + '/api/submit', { // default options are marked with *
