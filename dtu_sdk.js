@@ -53,7 +53,7 @@ const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
         'submit': ['click'],
         'textarea': ['change'],
         '': ['click'], // anchor
-        // undefined: [], // element_path indication
+        undefined: [], // spans, divs, etc.
       };
 const LISTEN_TO_DEFAULT_EVENTS = true;
 
