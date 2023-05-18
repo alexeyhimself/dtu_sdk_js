@@ -1,24 +1,15 @@
 //const excluded_events = "mousedown mouseup mousemove mouseover mouseout mousewheel";
 //const events = "click focus blur keydown change dblclick keydown keyup keypress textInput touchstart touchmove touchend touchcancel resize scroll zoom select change submit reset".split(" ");
 
-// To prettify setups of SDK in demos and instructions:
-// * if DTU_RX_API_submint_report_simulation is undefined by previous imports, set it to 'console.log' (as it has been before this code)
-// * this DEFAULT_CALLBACK value still could be reset with DoTheyUse(config.callback) initialization
-// So, nothing changes, but setup instructions get more nice.
-if (typeof DTU_RX_API_submint_report_simulation === 'undefined') {
-  console.warn("DTU_RX_API_submint_report_simulation is undefined. Setting 'console.log' as DEFAULT_CALLBACK");
-  DTU_RX_API_submint_report_simulation = console.log;
-}
-
 let REAL_OPERATION = true;
-if (['', 'dotheyuse.com'].includes(window.location.hostname))
+if (['--', 'dotheyuse.com'].includes(window.location.hostname))
   REAL_OPERATION = false;
 
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
-  console.warn('Fix values multiselect')
+  //console.warn('Fix values multiselect')
   let val = report['value'][0].replaceAll('\'', '"');
-  console.warn('Fix values parsing')
+  //console.warn('Fix values parsing')
   if (val[0] == '[')
     val = JSON.parse(val);
   report['value'] = String(val);
@@ -66,13 +57,20 @@ const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
       };
 const LISTEN_TO_DEFAULT_EVENTS = true;
 
-let DEFAULT_CALLBACK = DTU_RX_API_submint_report_simulation;
+let DEFAULT_CALLBACK = console.log;
 let DEFAULT_UID = 'you@example.com';
+
 if (REAL_OPERATION) {
   DEFAULT_CALLBACK = DTU_RX_API_submint_report;
   const uid_ms = Date.now(new Date()); // timestamp as unique UID
   const uid_s = Math.floor(uid_ms / 1000); // UID in seconds to make it shorter
   DEFAULT_UID = uid_s;
+}
+else {
+  if (typeof DTU_RX_API_submint_report_simulation !== 'undefined')
+    DEFAULT_CALLBACK = DTU_RX_API_submint_report_simulation;
+  else
+    console.warn("DTU_RX_API_submint_report_simulation is undefined. Setting 'console.log' as DEFAULT_CALLBACK");
 }
 
 const DEFAULT_PROBLEM_DESCRIPTION = '';
@@ -349,8 +347,11 @@ class DoTheyUse {
           + this.report.url_path;
           // + this.report.url_parameters
 
-        console.log('url:', url);
+        console.log('page url:', url);
         console.log('page title:', this.report.page_title);
+        console.log('callback:', this.callback);
+        if (REAL_OPERATION)
+          console.log('API url:', this.api_url);
         console.log('');
       }
 
