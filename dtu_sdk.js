@@ -58,6 +58,7 @@ const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
         undefined: ['click'], // spans, divs, etc.
       };
 const LISTEN_TO_DEFAULT_EVENTS = true;
+const SUPPORTED_ELEMENT_TAGS = ['A', 'BUTTON', 'INPUT'];
 
 let DEFAULT_CALLBACK = console.log;
 let DEFAULT_UID = 'you@example.com';
@@ -224,7 +225,7 @@ class DoTheyUse {
         }
       }
     }
-    this.elements_to_listen_to = elements_to_listen_to;
+    return elements_to_listen_to;
   }
 
   has_dtu_children(element) {
@@ -329,6 +330,48 @@ class DoTheyUse {
     return r;
   }
 
+  /*
+  get_nested_inner_text(node, accumulator) { // https://stackoverflow.com/questions/67134998/javascript-recursion-to-get-innertext
+    if (!accumulator)
+      accumulator = [];
+
+    if (node.nodeType === 3) {// 3 == text node
+      let node_text = node.nodeValue.trim();
+      if (node_text != '') {
+        accumulator.push(node_text);
+      }
+    }
+    else
+      for (let child of node.childNodes)
+        this.get_nested_inner_text(child, accumulator)
+
+    let return_value = {'inner_text': accumulator};
+    if (node.tagName == 'A')
+      return_value['href'] = node.href;
+    if (accumulator.length == 0)
+      return_value['status'] = 'no_text'
+    if (node.dataset)
+      if (node.dataset['dtuSkip'] !== undefined)
+        return_value['status'] = 'skip';
+    if (!return_value['status'])
+      return_value['status'] = 'ok';
+
+    return return_value;
+  }
+
+  d() {
+    for (let i = 0; i < SUPPORTED_ELEMENT_TAGS.length; i++) {
+      let tag = SUPPORTED_ELEMENT_TAGS[i];
+      let found_tags = document.querySelectorAll(tag);
+      for (let j = 0; j < found_tags.length; j++) {
+        let each_tag = found_tags[j];
+        let inner_text = this.get_nested_inner_text(each_tag)
+        console.log(inner_text)
+      }
+    }
+  }
+  */
+
   describe() {
     for (let i = 0; i < this.elements_to_listen_to.length; i++) {
       let element = this.elements_to_listen_to[i];
@@ -369,7 +412,7 @@ class DoTheyUse {
 
   listen() {
     const dtu_this = this;
-    dtu_this.collect_dtu_elements();
+    dtu_this.elements_to_listen_to = dtu_this.collect_dtu_elements();
     for (let i = 0; i < dtu_this.elements_to_listen_to.length; i++) {
       const element = dtu_this.elements_to_listen_to[i];
       try {

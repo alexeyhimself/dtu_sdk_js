@@ -210,8 +210,7 @@ test('SDK .listen() method throws an error if unsupported element type', () => {
   let config = {...minimum_valid_config};
   const dtu = imports.dotheyuse(config);
   let element = {'type': 'unit test unsupported type', 'parentElement': {'parentElement': {'className': undefined}}};
-  dtu.collect_dtu_elements = function () {};
-  dtu.elements_to_listen_to = [element];
+  dtu.collect_dtu_elements = function () {return [element]};
   dtu.listen();
   expect(element.parentElement.parentElement.className).toEqual('unsupported');
 });
