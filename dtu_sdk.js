@@ -345,14 +345,20 @@ class DoTheyUse {
       for (let child of node.childNodes)
         this.get_nested_inner_text(child, accumulator)
 
-    let return_value = {'inner_text': accumulator};
-    if (node.tagName == 'A')
-      return_value['href'] = node.href;
-    if (accumulator.length == 0)
-      return_value['status'] = 'no_text'
-    if (node.dataset)
+    let return_value = {};
+
+    if (node.dataset) {
+      if (node.dataset['dtu']) 
+        accumulator = [node.dataset['dtu']];
       if (node.dataset['dtuSkip'] !== undefined)
         return_value['status'] = 'skip';
+    }
+    if (accumulator.length == 0)
+      return_value['status'] = 'no_text'
+
+    return_value['inner_text'] = accumulator.join(', ');
+    if (node.tagName == 'A')
+      return_value['href'] = node.href;
     if (!return_value['status'])
       return_value['status'] = 'ok';
 
