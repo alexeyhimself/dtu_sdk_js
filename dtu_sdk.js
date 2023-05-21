@@ -58,7 +58,7 @@ const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
         undefined: ['click'], // spans, divs, etc.
       };
 const LISTEN_TO_DEFAULT_EVENTS = true;
-const SUPPORTED_ELEMENT_TAGS = ['A', 'BUTTON', 'INPUT'];
+const SUPPORTED_ELEMENT_TAGS = ['A--', 'BUTTON', 'INPUT'];
 
 let DEFAULT_CALLBACK = console.log;
 let DEFAULT_UID = 'you@example.com';
@@ -331,6 +331,14 @@ class DoTheyUse {
   }
 
   /*
+  prettify_url(url) { // is used as a substitute for inner_text when no inner text found
+    if (url.indexOf('?') > 0)
+      url = url.substring(0, url.indexOf('?')); // cut all url params after ? in url
+    if (url[url.length - 1] == '/')
+      url = url.substring(0, url.length - 1); // cut trailing '/' in url
+    return url;
+  }
+
   get_nested_inner_text(node, accumulator) { // https://stackoverflow.com/questions/67134998/javascript-recursion-to-get-innertext
     if (!accumulator)
       accumulator = [];
@@ -345,22 +353,50 @@ class DoTheyUse {
       for (let child of node.childNodes)
         this.get_nested_inner_text(child, accumulator)
 
+    return accumulator;
+  }
+
+  describe_element(node) {
+    let accumulator = this.get_nested_inner_text(node);
+
     let return_value = {};
 
     if (node.dataset) {
-      if (node.dataset['dtu']) 
-        accumulator = [node.dataset['dtu']];
-      if (node.dataset['dtuSkip'] !== undefined)
-        return_value['status'] = 'skip';
+      if (node.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE]) 
+        accumulator = [node.dataset['dtu']]; // if manually set dtu tag, then use its value
     }
-    if (accumulator.length == 0)
-      return_value['status'] = 'no_text'
+
+    if (accumulator.length == 0 || (accumulator.length == 1 && accumulator[0] == '')) {
+      return_value['status'] = 'no_inner_text'
+      
+      if (node.getAttribute("aria-label")) { // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label
+        accumulator[0] = node.getAttribute("aria-label");
+      }
+      else {
+        if (node.tagName == 'A')
+          accumulator[0] = this.prettify_url(node.getAttribute("href"));
+      }
+
+      if (![undefined, null, ''].includes(accumulator[0]))
+        return_value['status'] = 'inner_text_substitute';
+      else
+        return_value['web_element'] = node;
+    }
+
+    if (node.dataset) {
+      if (node.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE + 'Skip'] !== undefined)
+        return_value['status'] = 'skip'; // in the end to override any statuses because skip is priority
+    }
+    if (node.getAttribute("type") == "hidden")
+      return_value['status'] = 'hidden';
 
     return_value['inner_text'] = accumulator.join(', ');
     if (node.tagName == 'A')
-      return_value['href'] = node.href;
+      return_value['href'] = node.getAttribute("href");
     if (!return_value['status'])
       return_value['status'] = 'ok';
+
+    return_value['tag'] = node.tagName;
 
     return return_value;
   }
@@ -371,7 +407,7 @@ class DoTheyUse {
       let found_tags = document.querySelectorAll(tag);
       for (let j = 0; j < found_tags.length; j++) {
         let each_tag = found_tags[j];
-        let inner_text = this.get_nested_inner_text(each_tag)
+        let inner_text = this.describe_element(each_tag)
         console.log(inner_text)
       }
     }
