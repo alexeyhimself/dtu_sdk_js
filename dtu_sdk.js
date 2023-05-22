@@ -1,8 +1,10 @@
 //const excluded_events = "mousedown mouseup mousemove mouseover mouseout mousewheel";
 //const events = "click focus blur keydown change dblclick keydown keyup keypress textInput touchstart touchmove touchend touchcancel resize scroll zoom select change submit reset".split(" ");
 
+const DEFAULT_OPERATION_MODE = 'auto';
+
 let REAL_OPERATION = true;
-if (['--', 'dotheyuse.com'].includes(window.location.hostname))
+if (['', 'dotheyuse.com'].includes(window.location.hostname))
   REAL_OPERATION = false;
 
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
@@ -33,6 +35,16 @@ async function DTU_RX_API_submint_report(report, api_url) { // https://developer
   //return response.json(); // parses JSON response into native JavaScript objects // causes u_sdk.js?v=11:29 Uncaught (in promise) SyntaxError: Unexpected end of input (at d.. due to no-cors
 }
 
+// carrier function for event listener to make named function to be able to remove event listener
+// https://stackoverflow.com/questions/256754/how-to-pass-arguments-to-addeventlistener-listener-function
+var carrier_function = function(dtu_this) { 
+  return function curried_func(event) {
+    //console.log(dtu_this, event);
+    let r = dtu_this.process_element_event(event.target, event.type);
+    dtu_this.send_report(r);
+  }
+}
+
 const DEFAULT_CTAG = 'DEMO MVP';
 const DEFAULT_TOPIC = 'default';
 const DEFAULT_DTU_DATASET_ATTRIBUTE = "dtu";
@@ -57,8 +69,8 @@ const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
         '': ['click'], // anchor
         undefined: ['click'], // spans, divs, etc.
       };
-const LISTEN_TO_DEFAULT_EVENTS = true;
-const SUPPORTED_ELEMENT_TAGS = ['A--', 'BUTTON', 'INPUT'];
+//const LISTEN_TO_DEFAULT_EVENTS = true;
+const SUPPORTED_ELEMENT_TAGS = ['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'];
 
 let DEFAULT_CALLBACK = console.log;
 let DEFAULT_UID = 'you@example.com';
@@ -93,6 +105,7 @@ class DoTheyUse {
       return;
     }
 
+    this.mode = config.mode || DEFAULT_OPERATION_MODE; 
     this.ctag = config.ctag || DEFAULT_CTAG;
     this.topic = config.topic || DEFAULT_TOPIC;
     this.dtu_attribute = config.dtu_attribute || DEFAULT_DTU_DATASET_ATTRIBUTE;
@@ -100,7 +113,9 @@ class DoTheyUse {
     this.callback = config.callback || DEFAULT_CALLBACK;
     this.uid = this.get_synthetic_uid();
     this.ugids = this.get_synthetic_ugids();
+    this.elements_to_listen_to = [];
 
+    /*
     if ([true, false].includes(config.listen))
       this.listen_default_events = config.listen;
     else
@@ -108,8 +123,17 @@ class DoTheyUse {
 
     if (this.listen_default_events)
       this.listen();
-
+    */
     this.status = STATUS_READY;
+  }
+
+  set_mode(mode) {
+    this.mode = mode;
+    this.listen(); // to reload what is listened
+  }
+
+  get_mode() {
+    return this.mode;
   }
 
   set_uid(uid) {
@@ -225,6 +249,23 @@ class DoTheyUse {
         }
       }
     }
+    //console.log(elements_to_listen_to)
+    return elements_to_listen_to;
+  }
+
+  collect_all_elements() {
+    let elements_to_listen_to = [];
+
+    for (let i = 0; i < SUPPORTED_ELEMENT_TAGS.length; i++) {
+      let tag = SUPPORTED_ELEMENT_TAGS[i];
+      let elements = document.querySelectorAll(tag);
+      for (let j = 0; j < elements.length; j++) {
+        let element = elements[j];
+        if (element.type != 'hidden')
+          elements_to_listen_to.push(element);
+      }
+    }
+    //console.log(elements_to_listen_to)
     return elements_to_listen_to;
   }
 
@@ -412,7 +453,7 @@ class DoTheyUse {
       }
     }
   }
-  */
+  */  
 
   describe() {
     for (let i = 0; i < this.elements_to_listen_to.length; i++) {
@@ -452,24 +493,41 @@ class DoTheyUse {
     console.log('Totally:', this.elements_to_listen_to.length, 'element(s)');
   }
 
+  unlisten() {
+    if (this.elements_to_listen_to.length > 0) { // remove all existing dtu listeners if exist
+      for (let i = 0; i < this.elements_to_listen_to.length; i++) {
+        let element = this.elements_to_listen_to[i];
+        let events_to_listen = this.supported_input_types_and_events[element.type];
+        for (let j = 0; j < events_to_listen.length; j++) {
+          element.removeEventListener(events_to_listen[j], carrier_function(this), false);
+          if (element.getAttribute("dtu-listened"))
+            element.setAttribute("dtu-listened", false);
+        }
+      }
+    }
+  }
+
   listen() {
-    const dtu_this = this;
-    dtu_this.elements_to_listen_to = dtu_this.collect_dtu_elements();
-    for (let i = 0; i < dtu_this.elements_to_listen_to.length; i++) {
-      const element = dtu_this.elements_to_listen_to[i];
+    this.unlisten();
+
+    if (this.get_mode() == 'manual')
+      this.elements_to_listen_to = this.collect_dtu_elements();
+    else
+      this.elements_to_listen_to = this.collect_all_elements();
+
+    //console.log(this.elements_to_listen_to.length)
+
+    for (let i = 0; i < this.elements_to_listen_to.length; i++) {
+      const element = this.elements_to_listen_to[i];
       try {
-        const events_to_listen = dtu_this.supported_input_types_and_events[element.type];
+        const events_to_listen = this.supported_input_types_and_events[element.type];
         for (let j = 0; j < events_to_listen.length; j++) {
           // Prevention of adding listener to an element which is already being listened:
           // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
           if (element.getAttribute("dtu-listened"))
             continue;
 
-          element.addEventListener(events_to_listen[j], function (e) {
-            const event_this = e; // to distinguish event.this and dtu.this
-            let r = dtu_this.process_element_event(element, event_this.type);
-            dtu_this.send_report(r);
-          }, false);
+          element.addEventListener(events_to_listen[j], carrier_function(this), false);
 
           // When dtu.listen() is called in order not to listen again already listened elements
           // and due to no standard in-browser way of knowing if element has any listeners:
@@ -496,6 +554,7 @@ function dotheyuse(config) {
   const observer = new MutationObserver(() => { dtu.listen(); });
   observer.observe(document, cfg);
 
+  // Return object for calling it's methods in browser / JS code
   return dtu;
 }
 
@@ -503,4 +562,4 @@ try { // for jest unit tests
   exports.dotheyuse = dotheyuse; 
   exports.SUPPORTED_INPUT_TYPES_AND_EVENTS = SUPPORTED_INPUT_TYPES_AND_EVENTS;
 }
-catch (error) {} // to avoid an error "Uncaught ReferenceError: exports is not defined" in browser's dev console
+catch (error) {} // to mute an error "Uncaught ReferenceError: exports is not defined" in browser's dev console

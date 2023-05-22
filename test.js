@@ -50,6 +50,7 @@ test('SDK does not listen if config has "listen": false', () => {
   expect(dtu.listen_default_events).toBeFalsy();
 });
 
+/*
 test('SDK listens if config has "listen": true', () => {
   let config = {...minimum_valid_config};
   config.listen = true;
@@ -64,7 +65,7 @@ test('SDK listens if config has no "listen" option', () => {
   expect(dtu.listen_default_events).toBeTruthy();
 });
 
-/* looks like not relevant anymore with allowed no ctag
+// looks like not relevant anymore with allowed no ctag
 test('SDK does not listen if it has status "Not ready"', () => {
   const dtu = imports.dotheyuse({'callback': 'not_exists'});
   expect(dtu.status).toMatch(/Not ready/);
@@ -210,7 +211,7 @@ test('SDK .listen() method throws an error if unsupported element type', () => {
   let config = {...minimum_valid_config};
   const dtu = imports.dotheyuse(config);
   let element = {'type': 'unit test unsupported type', 'parentElement': {'parentElement': {'className': undefined}}};
-  dtu.collect_dtu_elements = function () {return [element]};
+  dtu.collect_all_elements = function () {return [element]};
   dtu.listen();
   expect(element.parentElement.parentElement.className).toEqual('unsupported');
 });
@@ -258,4 +259,44 @@ test('SDK .describe() method works', () => {
   element.getAttribute = function (argument) {};
   dtu.elements_to_listen_to = [element];  
   dtu.describe();
+});
+
+//// set, get
+test('SDK .get_uid() method gets uid', () => {
+  let config = {...minimum_valid_config};
+  const dtu = imports.dotheyuse(config);
+  expect(dtu.uid).toEqual(dtu.get_uid());
+});
+
+test('SDK .set_uid() method sets uid', () => {
+  let config = {...minimum_valid_config};
+  const dtu = imports.dotheyuse(config);
+  dtu.set_uid('test_uid');
+  expect(dtu.uid).toEqual(dtu.get_uid());
+});
+
+test('SDK .get_ugids() method gets ugids', () => {
+  let config = {...minimum_valid_config};
+  const dtu = imports.dotheyuse(config);
+  expect(dtu.ugids).toEqual(dtu.get_ugids());
+});
+
+test('SDK .set_ugids() method sets ugids', () => {
+  let config = {...minimum_valid_config};
+  const dtu = imports.dotheyuse(config);
+  dtu.set_ugids('test_ugids');
+  expect(dtu.ugids).toEqual(dtu.get_ugids());
+});
+
+test('SDK .get_mode() method gets mode', () => {
+  let config = {...minimum_valid_config};
+  const dtu = imports.dotheyuse(config);
+  expect(dtu.mode).toEqual(dtu.get_mode());
+});
+
+test('SDK .set_mode() method gets mode', () => {
+  let config = {...minimum_valid_config};
+  const dtu = imports.dotheyuse(config);
+  dtu.set_mode('test')
+  expect(dtu.mode).toEqual(dtu.get_mode());
 });
