@@ -300,3 +300,21 @@ test('SDK .set_mode() method gets mode', () => {
   dtu.set_mode('test')
   expect(dtu.mode).toEqual(dtu.get_mode());
 });
+
+//// prettify
+test('SDK .prettify_url() method cuts trailing /', () => {
+  let config = {...minimum_valid_config};
+  const dtu = imports.dotheyuse(config);
+  expect(dtu.prettify_url('test/')).toEqual('test');
+});
+test('SDK .prettify_url() method cuts everything after ?', () => {
+  let config = {...minimum_valid_config};
+  const dtu = imports.dotheyuse(config);
+  expect(dtu.prettify_url('test?param=1&param=2')).toEqual('test');
+});
+test('SDK .prettify_url() method cuts everything after ? and removes trailing /', () => {
+  let config = {...minimum_valid_config};
+  const dtu = imports.dotheyuse(config);
+  expect(dtu.prettify_url('test/?param=1&param=2')).toEqual('test');
+});
+

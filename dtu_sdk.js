@@ -4,7 +4,7 @@
 const DEFAULT_OPERATION_MODE = 'auto';
 
 let REAL_OPERATION = true;
-if (['', 'dotheyuse.com'].includes(window.location.hostname))
+if (['--', 'dotheyuse.com'].includes(window.location.hostname))
   REAL_OPERATION = false;
 
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
@@ -304,7 +304,7 @@ class DoTheyUse {
           parents.push(element_data_dtu);
         else {
           let element_description = this.describe_element(element);
-          if (element_description.status == 'ok')
+          if (['ok', 'inner_text_substitute'].includes(element_description.status))
             parents.push(element_description.inner_text);
           else
             console.error(element_description);
@@ -313,7 +313,7 @@ class DoTheyUse {
       else {
         if (i == 0) { // element get_path was originally called for
           let element_description = this.describe_element(element);
-          if (element_description.status == 'ok')
+          if (['ok', 'inner_text_substitute'].includes(element_description.status))
             parents.push(element_description.inner_text);
           else
             console.error(element_description);
@@ -420,12 +420,18 @@ class DoTheyUse {
     if (accumulator.length == 0 || (accumulator.length == 1 && accumulator[0] == '')) {
       return_value['status'] = 'no_inner_text'
       
-      if (node.getAttribute("aria-label")) { // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label
-        accumulator[0] = node.getAttribute("aria-label");
-      }
-      else {
-        if (node.tagName == 'A')
-          accumulator[0] = this.prettify_url(node.getAttribute("href"));
+      let parents = [];
+      for (; node && node !== document; node = node.parentNode ) { // https://gomakethings.com/how-to-get-all-parent-elements-with-vanilla-javascript/#1-get-all-parents
+        if (node.getAttribute("aria-label")) { // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label
+          accumulator[0] = node.getAttribute("aria-label");
+          break;
+        }
+        else {
+          if (node.tagName == 'A') {
+            accumulator[0] = this.prettify_url(node.getAttribute("href"));
+            break;
+          }
+        }
       }
 
       if (![undefined, null, ''].includes(accumulator[0]))

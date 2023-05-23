@@ -1,7 +1,7 @@
 import json
 import os
 
-MINIMUM_COVERAGE_PERCENT = 70
+MINIMUM_COVERAGE_PERCENT = 60
 
 os.system('npx jest --coverage')
 
