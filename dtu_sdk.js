@@ -4,33 +4,26 @@
 const DEFAULT_OPERATION_MODE = 'auto';
 
 let REAL_OPERATION = true;
-if (['--', 'dotheyuse.com'].includes(window.location.hostname))
+if (['', 'dotheyuse.com'].includes(window.location.hostname))
   REAL_OPERATION = false;
 
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
-  //console.warn('Fix values multiselect')
-  if (report['value']) {
-    let val = report['value'][0].replaceAll('\'', '"');
-    //console.warn('Fix values parsing')
-    if (val[0] == '[')
-      val = JSON.parse(val);
-    report['value'] = String(val);  
-  }
+  report['value'] = String(report['value']);  
   report['ugids'] = String(report['ugids']);
-  //console.log(report)
+  
   const response = await fetch(api_url + '/api/submit', { // default options are marked with *
     method: "POST",
     mode: "no-cors", // no-cors, *cors, same-origin
     cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
     credentials: "include", // include, *same-origin, omit
     headers: {
-      //"Content-Type": "application/json",
+      //"Content-Type": "application/json", // json is not allowed for no-cors
       "Content-Type": "application/x-www-form-urlencoded"
     },
     redirect: "follow", // manual, *follow, error
     referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-    body: JSON.stringify(report), // body data type must match "Content-Type" header
+    body: encodeURIComponent(JSON.stringify(report))
   });
   //return response.json(); // parses JSON response into native JavaScript objects // causes u_sdk.js?v=11:29 Uncaught (in promise) SyntaxError: Unexpected end of input (at d.. due to no-cors
 }
