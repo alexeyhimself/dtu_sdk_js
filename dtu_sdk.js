@@ -297,20 +297,31 @@ class DoTheyUse {
   get_element_path(element) {
     let parents = [];
     // element = element.parentNode; // do not include this element in the path
-    for ( ; element && element !== document; element = element.parentNode ) { // https://gomakethings.com/how-to-get-all-parent-elements-with-vanilla-javascript/#1-get-all-parents
+    for (let i = 0; element && element !== document; element = element.parentNode ) { // https://gomakethings.com/how-to-get-all-parent-elements-with-vanilla-javascript/#1-get-all-parents
       let element_data_dtu = element.getAttribute('data-dtu');
       if (element_data_dtu !== null) {
         if (element_data_dtu != '')
           parents.push(element_data_dtu);
         else {
-          if (['A', 'BUTTON'].includes(element.tagName)) {
-            parents.push(element.innerText);
-          }
+          let element_description = this.describe_element(element);
+          if (element_description.status == 'ok')
+            parents.push(element_description.inner_text);
           else
-            console.error('Invalid data-dtu value for the element: ', element);
+            console.error(element_description);
         }
       }
+      else {
+        if (i == 0) { // element get_path was originally called for
+          let element_description = this.describe_element(element);
+          if (element_description.status == 'ok')
+            parents.push(element_description.inner_text);
+          else
+            console.error(element_description);
+        }
+      }
+      i++;
     }
+    //console.log(parents)
     return parents.reverse();
   }
 
@@ -371,8 +382,7 @@ class DoTheyUse {
     return r;
   }
 
-  /*
-  prettify_url(url) { // is used as a substitute for inner_text when no inner text found
+  prettify_url(url) { // is used as a substitute for inner_text for A tag when no inner text found
     if (url.indexOf('?') > 0)
       url = url.substring(0, url.indexOf('?')); // cut all url params after ? in url
     if (url[url.length - 1] == '/')
@@ -452,8 +462,7 @@ class DoTheyUse {
         console.log(inner_text)
       }
     }
-  }
-  */  
+  } 
 
   describe() {
     for (let i = 0; i < this.elements_to_listen_to.length; i++) {
