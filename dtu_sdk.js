@@ -209,7 +209,7 @@ class DoTheyUse {
     this.report.url_path = window.location.pathname;
     this.report.url_parameters = window.location.search;
 
-    //this.report.page_title = document.title;
+    this.report.page_title = encodeURIComponent(document.title); // to allow passing &?$#%@ etc.
   }
 
   make_report(r) {
