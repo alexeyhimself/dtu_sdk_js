@@ -9,9 +9,10 @@ if (['', 'dotheyuse.com'].includes(window.location.hostname))
 
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
-  report['value'] = String(report['value']);  
   report['ugids'] = String(report['ugids']);
-  
+  report['value'] = btoa(String(report['value']));
+  report['page_title'] = btoa(String(report['page_title']));
+
   const response = await fetch(api_url + '/api/submit', { // default options are marked with *
     method: "POST",
     mode: "no-cors", // no-cors, *cors, same-origin
@@ -25,7 +26,7 @@ async function DTU_RX_API_submint_report(report, api_url) { // https://developer
     referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
     body: encodeURIComponent(JSON.stringify(report))
   });
-  //return response.json(); // parses JSON response into native JavaScript objects // causes u_sdk.js?v=11:29 Uncaught (in promise) SyntaxError: Unexpected end of input (at d.. due to no-cors
+  //return response.json(); // causes dtu_sdk.js?v=11:28 Uncaught (in promise) SyntaxError: Unexpected end of input (at d.. due to no-cors
 }
 
 // carrier function for event listener to make named function to be able to remove event listener
@@ -33,35 +34,52 @@ async function DTU_RX_API_submint_report(report, api_url) { // https://developer
 var carrier_function = function(dtu_this) { 
   return function curried_func(event) {
     //console.log(dtu_this, event);
-    let r = dtu_this.process_element_event(event.target, event.type);
+    let r = dtu_this.process_element(event.target);
+    r['event_type'] = event.type;
     dtu_this.send_report(r);
   }
+}
+
+const DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS = {
+  'A': {
+    '': 'click', // yes, a.type is ''
+  },
+  'INPUT': {
+    'select-one': 'change',
+    'select-multiple': 'change',
+    'datetime-local': 'change',
+    'date': 'change',
+    'time': 'change',
+    'checkbox': 'change',
+    'radio': 'change',
+    'email': 'change',
+    'password': 'change',
+    'number': 'change',
+    'range': 'change',
+    'file': 'change',
+    'text': 'change',
+    'button': 'click',
+    'submit': 'click',
+    'textarea': 'change',
+  },
+  'BUTTON': {
+    'button': 'click',
+    'submit': 'click',
+  },
+  'SELECT': {
+    'select-one': 'change',
+    'select-multiple': 'change',
+  },
+  'TEXTAREA': {
+    'textarea': 'change',
+  },
 }
 
 const DEFAULT_CTAG = 'DEMO MVP';
 const DEFAULT_TOPIC = 'default';
 const DEFAULT_DTU_DATASET_ATTRIBUTE = "dtu";
 const DEFAULT_API_URL = 'http://localhost';
-const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
-        'select-one': ['change'],
-        'select-multiple': ['change'],
-        'datetime-local': ['change'],
-        'date': ['change'],
-        'time': ['change'],
-        'checkbox': ['change'],
-        'radio': ['change'],
-        'email': ['change'],
-        'password': ['change'],
-        'number': ['change'],
-        'range': ['change'],
-        'file': ['change'],
-        'text': ['change'],
-        'button': ['click'],
-        'submit': ['click'],
-        'textarea': ['change'],
-        '': ['click'], // anchor
-        undefined: ['click'], // spans, divs, etc.
-      };
+
 //const LISTEN_TO_DEFAULT_EVENTS = true;
 const SUPPORTED_ELEMENT_TAGS = ['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'];
 
@@ -91,7 +109,6 @@ class DoTheyUse {
   constructor(config) {
     this.status = STATUS_NOT_READY;
     this.problem_description = DEFAULT_PROBLEM_DESCRIPTION;
-    this.supported_input_types_and_events = SUPPORTED_INPUT_TYPES_AND_EVENTS;
 
     if (!this.config_is_valid(config)) {
       console.error(this.problem_description);
@@ -209,7 +226,7 @@ class DoTheyUse {
     this.report.url_path = window.location.pathname;
     this.report.url_parameters = window.location.search;
 
-    this.report.page_title = encodeURIComponent(document.title); // to allow passing &?$#%@ etc.
+    this.report.page_title = document.title;
   }
 
   make_report(r) {
@@ -227,12 +244,12 @@ class DoTheyUse {
   }
 
   collect_dtu_elements() {
-    const elements_with_data_dtu = document.querySelectorAll('[data-' + this.dtu_attribute + ']') || [];
     let elements_to_listen_to = [];
+    const elements_with_data_dtu = document.querySelectorAll('[data-' + this.dtu_attribute + ']') || [];
     for (let i = 0; i < elements_with_data_dtu.length; i++) {
       let element = elements_with_data_dtu[i];
-      if (SUPPORTED_INPUT_TYPES_AND_EVENTS[element.type]) {
-        if (!this.has_dtu_children(element))
+      if (DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type]) {
+        if (!this.has_dtu_children(element) && element.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE + 'Skip'] === undefined)
           elements_to_listen_to.push(element);
       }
       else {
@@ -248,14 +265,19 @@ class DoTheyUse {
 
   collect_all_elements() {
     let elements_to_listen_to = [];
+    const supported_tags = Object.keys(DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS);
 
-    for (let i = 0; i < SUPPORTED_ELEMENT_TAGS.length; i++) {
-      let tag = SUPPORTED_ELEMENT_TAGS[i];
+    for (let i = 0; i < supported_tags.length; i++) {
+      let tag = supported_tags[i];
       let elements = document.querySelectorAll(tag);
       for (let j = 0; j < elements.length; j++) {
         let element = elements[j];
-        if (element.type != 'hidden')
+        const supported_tags_types = Object.keys(DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[tag])
+        if (supported_tags_types.includes(element.type) && element.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE + 'Skip'] === undefined) {
           elements_to_listen_to.push(element);
+        }
+        //else if (element.type != 'hidden')
+        //  console.warn(element)
       }
     }
     //console.log(elements_to_listen_to)
@@ -318,58 +340,46 @@ class DoTheyUse {
     return parents.reverse();
   }
 
-  process_element_event(element, event_type) {
+  process_element(element) {
     let r = {};
-    const el = element.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE];
-    if (el)
-      r.element = el;
-    else {
-      if (['A', 'BUTTON'].includes(element.tagName)) {
-        r.element = element.innerText;
-      }
-    }
 
+    const element_description = this.describe_element(element);
+
+    r['element'] = element_description['inner_text'];
     r['element_path'] = this.get_element_path(element);
+    
+    const element_type = element_description['element_type'];
+    r['element_type'] = element_type;
 
-    r.element_type = element.type;
-    r.event_type = event_type;
+    const element_tag = element_description['tag'];
+    if ('A' == element_tag)
+      r['element_type'] = 'anchor'; // as type = '' for this element type
+    else if ('BUTTON' == element_tag)
+      r['element_type'] = 'button'; // as type = '' for this element type
+    else if (['UL', 'OL'].includes(element_tag))
+      r['element_type'] = 'list'; // as type = '' for this element type
 
-    let val;
-    if ('A' == element.tagName) {
-      val = element.innerText;
-      r.element_type = 'anchor'; // as type = '' for this element type
-    } 
-    else if ('BUTTON' == element.tagName) {
-      val = element.innerText;
-      r.element_type = 'button'; // as type = '' for this element type
-    }
-    else if (['UL', 'OL'].includes(element.tagName)) {
-      r.element_type = 'list'; // as type = '' for this element type
-    }
-    else
-      val = element.value;
+    r['value'] = element_description['value'];
 
-    r.value = val;
-
-    if (['checkbox', 'radio'].includes(element.type))
+    if (['checkbox', 'radio'].includes(element_type))
       r['checked'] = element.checked;
 
-    if (['password', 'text', 'textarea'].includes(element.type))
-      r.value = val.length; // send number of symbols rather than content
+    if (['password', 'text', 'textarea'].includes(element_type))
+      r['value'] = element_description['value'].length; // send number of symbols rather than content
 
-    if ('file' == element.type) {
+    if ('file' == element_type) {
       const files = [];
       for (var i = 0; i < element.files.length; i++) {
         let file_name = element.files[i].name;
         files.push(file_name);
       }
-      r.value = files; // send file name(s) rather than files
+      r['value'] = files; // send file name(s) rather than files
     }
 
-    if (['select-one', 'select-multiple'].includes(element.type)) {
+    if (['select-one', 'select-multiple'].includes(element_type)) {
       const options = element.selectedOptions; // https://stackoverflow.com/questions/5866169/how-to-get-all-selected-values-of-a-multiple-select-box
       const values = Array.from(options).map(({ value }) => value);
-      r.value = values;
+      r['value'] = values;
     }
 
     return r;
@@ -393,41 +403,74 @@ class DoTheyUse {
         accumulator.push(node_text);
       }
     }
-    else
-      for (let child of node.childNodes)
-        this.get_nested_inner_text(child, accumulator)
+    else {
+      if (node.childNodes) {
+        for (let child of node.childNodes)
+          this.get_nested_inner_text(child, accumulator)
+      }
+      else if (node.innerText) {
+        accumulator.push(node.innerText);
+      }
+    }
 
     return accumulator;
   }
 
+  get_nested_outer_text_type_and_tag(node) {
+    let outer_text = node.innerText;
+    let element_type = node.type;
+    let tag = node.tagName;
+    for (; node && node !== document; node = node.parentNode ) { // https://gomakethings.com/how-to-get-all-parent-elements-with-vanilla-javascript/#1-get-all-parents
+      element_type = node.type;
+      tag = node.tagName;
+      if (node.nodeType === 3) {// 3 == text node
+        let node_text = node.nodeValue.trim();
+        if (node_text != '') {
+          outer_text = node_text;
+          break;
+        }
+        else if (node.getAttribute("aria-label")) { // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label
+          outer_text = node.getAttribute("aria-label");
+          break;
+        }
+      }
+      else if (node.getAttribute("aria-label")) { // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label
+        outer_text = node.getAttribute("aria-label");
+        break;
+      }
+      else {
+        if (node.tagName == 'A') {
+          outer_text = this.prettify_url(node.getAttribute("href"));
+          break;
+        }
+      }
+    }
+    return {'outer_text': outer_text, 'element_type': element_type, 'tag': tag};
+  }
+
   describe_element(node) {
-    let accumulator = this.get_nested_inner_text(node);
+    let text = this.get_nested_inner_text(node);
+    let inner_text = text;
 
     let return_value = {};
+    return_value['element_type'] = node.type;
+    return_value['tag'] = node.tagName;
+    return_value['value'] = node.value;
 
     if (node.dataset) {
       if (node.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE]) 
-        accumulator = [node.dataset['dtu']]; // if manually set dtu tag, then use its value
+        text = [node.dataset['dtu']]; // if manually set dtu tag, then use its value
     }
 
-    if (accumulator.length == 0 || (accumulator.length == 1 && accumulator[0] == '')) {
+    if (text.length == 0 || (text.length == 1 && text[0] == '')) {
       return_value['status'] = 'no_inner_text'
       
-      let parents = [];
-      for (; node && node !== document; node = node.parentNode ) { // https://gomakethings.com/how-to-get-all-parent-elements-with-vanilla-javascript/#1-get-all-parents
-        if (node.getAttribute("aria-label")) { // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label
-          accumulator[0] = node.getAttribute("aria-label");
-          break;
-        }
-        else {
-          if (node.tagName == 'A') {
-            accumulator[0] = this.prettify_url(node.getAttribute("href"));
-            break;
-          }
-        }
-      }
-
-      if (![undefined, null, ''].includes(accumulator[0]))
+      const outer_text_type_and_tag = this.get_nested_outer_text_type_and_tag(node);
+      text.push(outer_text_type_and_tag['outer_text']);
+      return_value['element_type'] = outer_text_type_and_tag['element_type'];
+      return_value['tag'] = outer_text_type_and_tag['tag'];
+    
+      if (![undefined, null, ''].includes(text[0]))
         return_value['status'] = 'inner_text_substitute';
       else
         return_value['web_element'] = node;
@@ -440,13 +483,20 @@ class DoTheyUse {
     if (node.getAttribute("type") == "hidden")
       return_value['status'] = 'hidden';
 
-    return_value['inner_text'] = accumulator.join(', ');
-    if (node.tagName == 'A')
+    return_value['inner_text'] = text.join(', ');
+    if (node.tagName == 'A') {
       return_value['href'] = node.getAttribute("href");
+      return_value['value'] = inner_text.join(', ');
+    }
+    else if (node.tagName == 'BUTTON') {
+      if (!node.value)
+        return_value['value'] = inner_text.join(', ');
+      else
+        return_value['value'] = node.value;
+    }
+
     if (!return_value['status'])
       return_value['status'] = 'ok';
-
-    return_value['tag'] = node.tagName;
 
     return return_value;
   }
@@ -466,8 +516,9 @@ class DoTheyUse {
   describe() {
     for (let i = 0; i < this.elements_to_listen_to.length; i++) {
       let element = this.elements_to_listen_to[i];
-      let event = this.supported_input_types_and_events[element.type][0];
-      let r = this.process_element_event(element, event);
+      let event_type = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
+      let r = this.process_element(element);
+      r['event_type'] = event_type;
       this.make_report(r);
 
       if (i == 0) { // only for the first element
@@ -505,12 +556,10 @@ class DoTheyUse {
     if (this.elements_to_listen_to.length > 0) { // remove all existing dtu listeners if exist
       for (let i = 0; i < this.elements_to_listen_to.length; i++) {
         let element = this.elements_to_listen_to[i];
-        let events_to_listen = this.supported_input_types_and_events[element.type];
-        for (let j = 0; j < events_to_listen.length; j++) {
-          element.removeEventListener(events_to_listen[j], carrier_function(this), false);
-          if (element.getAttribute("dtu-listened"))
-            element.setAttribute("dtu-listened", false);
-        }
+        let event_to_listen = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
+        element.removeEventListener(event_to_listen, carrier_function(this), false);
+        if (element.getAttribute("dtu-listened"))
+          element.setAttribute("dtu-listened", false);
       }
     }
   }
@@ -528,21 +577,19 @@ class DoTheyUse {
     for (let i = 0; i < this.elements_to_listen_to.length; i++) {
       const element = this.elements_to_listen_to[i];
       try {
-        const events_to_listen = this.supported_input_types_and_events[element.type];
-        for (let j = 0; j < events_to_listen.length; j++) {
-          // Prevention of adding listener to an element which is already being listened:
-          // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
-          if (element.getAttribute("dtu-listened"))
-            continue;
+        const event_to_listen = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
+        // Prevention of adding listener to an element which is already being listened:
+        // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
+        if (element.getAttribute("dtu-listened"))
+          continue;
 
-          element.addEventListener(events_to_listen[j], carrier_function(this), false);
+        element.addEventListener(event_to_listen, carrier_function(this), false);
 
-          // When dtu.listen() is called in order not to listen again already listened elements
-          // and due to no standard in-browser way of knowing if element has any listeners:
-          // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
-          // we add attribute which will allow prevention of listening again:
-          element.setAttribute("dtu-listened", true);
-        }  
+        // When dtu.listen() is called in order not to listen again already listened elements
+        // and due to no standard in-browser way of knowing if element has any listeners:
+        // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
+        // we add attribute which will allow prevention of listening again:
+        element.setAttribute("dtu-listened", true);
       }
       catch (error) {
         console.error("Unsupported element:\n", element, "\n", "element type: ", element.type, error);
@@ -568,6 +615,6 @@ function dotheyuse(config) {
 
 try { // for jest unit tests
   exports.dotheyuse = dotheyuse; 
-  exports.SUPPORTED_INPUT_TYPES_AND_EVENTS = SUPPORTED_INPUT_TYPES_AND_EVENTS;
+  exports.DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS;
 }
 catch (error) {} // to mute an error "Uncaught ReferenceError: exports is not defined" in browser's dev console
