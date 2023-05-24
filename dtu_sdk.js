@@ -10,9 +10,8 @@ if (['--', 'dotheyuse.com'].includes(window.location.hostname))
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
   report['ugids'] = String(report['ugids']);
-  let v = String(report['value']);
-  console.log(v, btoa(v), atob(btoa(v)));
-  report['value'] = btoa(v);
+  report['value'] = btoa(String(report['value']));
+  report['page_title'] = btoa(String(report['page_title']));
 
   const response = await fetch(api_url + '/api/submit', { // default options are marked with *
     method: "POST",
@@ -227,7 +226,7 @@ class DoTheyUse {
     this.report.url_path = window.location.pathname;
     this.report.url_parameters = window.location.search;
 
-    //this.report.page_title = document.title;
+    this.report.page_title = document.title;
   }
 
   make_report(r) {
