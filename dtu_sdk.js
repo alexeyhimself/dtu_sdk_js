@@ -33,7 +33,8 @@ async function DTU_RX_API_submint_report(report, api_url) { // https://developer
 var carrier_function = function(dtu_this) { 
   return function curried_func(event) {
     //console.log(dtu_this, event);
-    let r = dtu_this.process_element_event(event.target, event.type);
+    let r = dtu_this.process_element(event.target);
+    r['event_type'] = event.type;
     dtu_this.send_report(r);
   }
 }
@@ -242,7 +243,7 @@ class DoTheyUse {
     for (let i = 0; i < elements_with_data_dtu.length; i++) {
       let element = elements_with_data_dtu[i];
       if (DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type]) {
-        if (!this.has_dtu_children(element))
+        if (!this.has_dtu_children(element) && element.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE + 'Skip'] === undefined)
           elements_to_listen_to.push(element);
       }
       else {
@@ -266,8 +267,9 @@ class DoTheyUse {
       for (let j = 0; j < elements.length; j++) {
         let element = elements[j];
         const supported_tags_types = Object.keys(DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[tag])
-        if (supported_tags_types.includes(element.type))
+        if (supported_tags_types.includes(element.type) && element.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE + 'Skip'] === undefined) {
           elements_to_listen_to.push(element);
+        }
         //else if (element.type != 'hidden')
         //  console.warn(element)
       }
@@ -332,58 +334,46 @@ class DoTheyUse {
     return parents.reverse();
   }
 
-  process_element_event(element, event_type) {
+  process_element(element) {
     let r = {};
-    const el = element.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE];
-    if (el)
-      r.element = el;
-    else {
-      if (['A', 'BUTTON'].includes(element.tagName)) {
-        r.element = element.innerText;
-      }
-    }
 
+    const element_description = this.describe_element(element);
+
+    r['element'] = element_description['inner_text'];
     r['element_path'] = this.get_element_path(element);
+    
+    const element_type = element_description['element_type'];
+    r['element_type'] = element_type;
 
-    r.element_type = element.type;
-    r.event_type = event_type;
+    const element_tag = element_description['tag'];
+    if ('A' == element_tag)
+      r['element_type'] = 'anchor'; // as type = '' for this element type
+    else if ('BUTTON' == element_tag)
+      r['element_type'] = 'button'; // as type = '' for this element type
+    else if (['UL', 'OL'].includes(element_tag))
+      r['element_type'] = 'list'; // as type = '' for this element type
 
-    let val;
-    if ('A' == element.tagName) {
-      val = element.innerText;
-      r.element_type = 'anchor'; // as type = '' for this element type
-    } 
-    else if ('BUTTON' == element.tagName) {
-      val = element.innerText;
-      r.element_type = 'button'; // as type = '' for this element type
-    }
-    else if (['UL', 'OL'].includes(element.tagName)) {
-      r.element_type = 'list'; // as type = '' for this element type
-    }
-    else
-      val = element.value;
+    r['value'] = element_description['value'];
 
-    r.value = val;
-
-    if (['checkbox', 'radio'].includes(element.type))
+    if (['checkbox', 'radio'].includes(element_type))
       r['checked'] = element.checked;
 
-    if (['password', 'text', 'textarea'].includes(element.type))
-      r.value = val.length; // send number of symbols rather than content
+    if (['password', 'text', 'textarea'].includes(element_type))
+      r['value'] = element_description['value'].length; // send number of symbols rather than content
 
-    if ('file' == element.type) {
+    if ('file' == element_type) {
       const files = [];
       for (var i = 0; i < element.files.length; i++) {
         let file_name = element.files[i].name;
         files.push(file_name);
       }
-      r.value = files; // send file name(s) rather than files
+      r['value'] = files; // send file name(s) rather than files
     }
 
-    if (['select-one', 'select-multiple'].includes(element.type)) {
+    if (['select-one', 'select-multiple'].includes(element_type)) {
       const options = element.selectedOptions; // https://stackoverflow.com/questions/5866169/how-to-get-all-selected-values-of-a-multiple-select-box
       const values = Array.from(options).map(({ value }) => value);
-      r.value = values;
+      r['value'] = values;
     }
 
     return r;
@@ -407,41 +397,74 @@ class DoTheyUse {
         accumulator.push(node_text);
       }
     }
-    else
-      for (let child of node.childNodes)
-        this.get_nested_inner_text(child, accumulator)
+    else {
+      if (node.childNodes) {
+        for (let child of node.childNodes)
+          this.get_nested_inner_text(child, accumulator)
+      }
+      else if (node.innerText) {
+        accumulator.push(node.innerText);
+      }
+    }
 
     return accumulator;
   }
 
+  get_nested_outer_text_type_and_tag(node) {
+    let outer_text = node.innerText;
+    let element_type = node.type;
+    let tag = node.tagName;
+    for (; node && node !== document; node = node.parentNode ) { // https://gomakethings.com/how-to-get-all-parent-elements-with-vanilla-javascript/#1-get-all-parents
+      element_type = node.type;
+      tag = node.tagName;
+      if (node.nodeType === 3) {// 3 == text node
+        let node_text = node.nodeValue.trim();
+        if (node_text != '') {
+          outer_text = node_text;
+          break;
+        }
+        else if (node.getAttribute("aria-label")) { // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label
+          outer_text = node.getAttribute("aria-label");
+          break;
+        }
+      }
+      else if (node.getAttribute("aria-label")) { // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label
+        outer_text = node.getAttribute("aria-label");
+        break;
+      }
+      else {
+        if (node.tagName == 'A') {
+          outer_text = this.prettify_url(node.getAttribute("href"));
+          break;
+        }
+      }
+    }
+    return {'outer_text': outer_text, 'element_type': element_type, 'tag': tag};
+  }
+
   describe_element(node) {
-    let accumulator = this.get_nested_inner_text(node);
+    let text = this.get_nested_inner_text(node);
+    let inner_text = text;
 
     let return_value = {};
+    return_value['element_type'] = node.type;
+    return_value['tag'] = node.tagName;
+    return_value['value'] = node.value;
 
     if (node.dataset) {
       if (node.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE]) 
-        accumulator = [node.dataset['dtu']]; // if manually set dtu tag, then use its value
+        text = [node.dataset['dtu']]; // if manually set dtu tag, then use its value
     }
 
-    if (accumulator.length == 0 || (accumulator.length == 1 && accumulator[0] == '')) {
+    if (text.length == 0 || (text.length == 1 && text[0] == '')) {
       return_value['status'] = 'no_inner_text'
       
-      let parents = [];
-      for (; node && node !== document; node = node.parentNode ) { // https://gomakethings.com/how-to-get-all-parent-elements-with-vanilla-javascript/#1-get-all-parents
-        if (node.getAttribute("aria-label")) { // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label
-          accumulator[0] = node.getAttribute("aria-label");
-          break;
-        }
-        else {
-          if (node.tagName == 'A') {
-            accumulator[0] = this.prettify_url(node.getAttribute("href"));
-            break;
-          }
-        }
-      }
-
-      if (![undefined, null, ''].includes(accumulator[0]))
+      const outer_text_type_and_tag = this.get_nested_outer_text_type_and_tag(node);
+      text.push(outer_text_type_and_tag['outer_text']);
+      return_value['element_type'] = outer_text_type_and_tag['element_type'];
+      return_value['tag'] = outer_text_type_and_tag['tag'];
+    
+      if (![undefined, null, ''].includes(text[0]))
         return_value['status'] = 'inner_text_substitute';
       else
         return_value['web_element'] = node;
@@ -454,13 +477,20 @@ class DoTheyUse {
     if (node.getAttribute("type") == "hidden")
       return_value['status'] = 'hidden';
 
-    return_value['inner_text'] = accumulator.join(', ');
-    if (node.tagName == 'A')
+    return_value['inner_text'] = text.join(', ');
+    if (node.tagName == 'A') {
       return_value['href'] = node.getAttribute("href");
+      return_value['value'] = inner_text.join(', ');
+    }
+    else if (node.tagName == 'BUTTON') {
+      if (!node.value)
+        return_value['value'] = inner_text.join(', ');
+      else
+        return_value['value'] = node.value;
+    }
+
     if (!return_value['status'])
       return_value['status'] = 'ok';
-
-    return_value['tag'] = node.tagName;
 
     return return_value;
   }
@@ -480,8 +510,9 @@ class DoTheyUse {
   describe() {
     for (let i = 0; i < this.elements_to_listen_to.length; i++) {
       let element = this.elements_to_listen_to[i];
-      let event = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
-      let r = this.process_element_event(element, event);
+      let event_type = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
+      let r = this.process_element(element);
+      r['event_type'] = event_type;
       this.make_report(r);
 
       if (i == 0) { // only for the first element
