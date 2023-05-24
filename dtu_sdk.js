@@ -4,14 +4,16 @@
 const DEFAULT_OPERATION_MODE = 'auto';
 
 let REAL_OPERATION = true;
-if (['', 'dotheyuse.com'].includes(window.location.hostname))
+if (['--', 'dotheyuse.com'].includes(window.location.hostname))
   REAL_OPERATION = false;
 
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
-  report['value'] = String(report['value']);  
   report['ugids'] = String(report['ugids']);
-  
+  let v = String(report['value']);
+  console.log(v, btoa(v), atob(btoa(v)));
+  report['value'] = btoa(v);
+
   const response = await fetch(api_url + '/api/submit', { // default options are marked with *
     method: "POST",
     mode: "no-cors", // no-cors, *cors, same-origin
@@ -65,8 +67,13 @@ const DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS = {
     'button': 'click',
     'submit': 'click',
   },
-  'SELECT': {},
-  'TEXTAREA': {},
+  'SELECT': {
+    'select-one': 'change',
+    'select-multiple': 'change',
+  },
+  'TEXTAREA': {
+    'textarea': 'change',
+  },
 }
 
 const DEFAULT_CTAG = 'DEMO MVP';
