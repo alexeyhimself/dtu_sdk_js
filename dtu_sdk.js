@@ -4,7 +4,7 @@
 const DEFAULT_OPERATION_MODE = 'auto';
 
 let REAL_OPERATION = true;
-if (['--', 'dotheyuse.com'].includes(window.location.hostname))
+if (['', 'dotheyuse.com'].includes(window.location.hostname))
   REAL_OPERATION = false;
 
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
