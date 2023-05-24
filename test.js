@@ -74,7 +74,8 @@ test('SDK does not listen if it has status "Not ready"', () => {
 */
 
 // form report
-const SUPPORTED_INPUT_TYPES_AND_EVENTS = imports.SUPPORTED_INPUT_TYPES_AND_EVENTS;
+const DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS = imports.DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS;
+const SUPPORTED_INPUT_TYPES_AND_EVENTS = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS['INPUT'];
 const types_all = Object.keys(SUPPORTED_INPUT_TYPES_AND_EVENTS);
 const types_secret_or_long = ['password', 'text', 'textarea'];
 const types_files = ['file'];
@@ -94,7 +95,7 @@ test.each(types_normal)('SDK .form_report() method works for type: %s', (type) =
   config.callback = mock_send;
   const dtu = imports.dotheyuse(config);
 
-  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type][0]};
+  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type]};
 
   let element = {'type': type, 'parentNode': document};
   element['dataset'] = {};
@@ -114,7 +115,7 @@ test.each(types_secret_or_long)('SDK .form_report() method forms report for type
   config.callback = mock_send;
   const dtu = imports.dotheyuse(config);
 
-  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type][0]};
+  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type]};
 
   let element = {'type': type};
   element['dataset'] = {};
@@ -134,7 +135,7 @@ test.each(types_files)('SDK .form_report() method forms report for type: %s', (t
   config.callback = mock_send;
   const dtu = imports.dotheyuse(config);
 
-  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type][0]};
+  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type]};
 
   let element = {'type': type, 'files': [{'name': 1}, {'name': 2}]};
   element['dataset'] = {};
@@ -153,7 +154,7 @@ test('SDK .form_report() method forms report for type: select-one', () => {
   const dtu = imports.dotheyuse(config);
 
   const type = 'select-one';
-  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type][0]};
+  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type]};
 
   let element = {'type': type, 'selectedOptions': [{'value': 1}]};
   element['dataset'] = {};
@@ -172,7 +173,7 @@ test('SDK .form_report() method forms report for type: select-multiple', () => {
   const dtu = imports.dotheyuse(config);
 
   const type = 'select-multiple';
-  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type][0]};
+  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type]};
   
   let element = {'type': type, 'selectedOptions': [{'value': 1}, {'value': 2}]};
   element['dataset'] = {};
@@ -192,7 +193,7 @@ test.each(['A', 'BUTTON'])('SDK .form_report() method forms value of innerText f
   const dtu = imports.dotheyuse(config);
 
   let type = ''; // 'A' has '', 'BUTTON' has 'submit'
-  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type][0]};
+  let event = {'type': SUPPORTED_INPUT_TYPES_AND_EVENTS[type]};
 
   let element = {'type': type, 'tagName': tag};
   element['dataset'] = {};
@@ -251,7 +252,7 @@ test('SDK .describe() method works', () => {
   let config = {...minimum_valid_config};
   const dtu = imports.dotheyuse(config);
   const type = 'text';
-  let element = {'type': type};
+  let element = {'type': type, 'tagName': 'INPUT'};
   element['dataset'] = {};
   const element_name = 'some ' + type;
   element['dataset'][dtu.dtu_attribute] = element_name;

@@ -25,7 +25,7 @@ async function DTU_RX_API_submint_report(report, api_url) { // https://developer
     referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
     body: encodeURIComponent(JSON.stringify(report))
   });
-  //return response.json(); // parses JSON response into native JavaScript objects // causes u_sdk.js?v=11:29 Uncaught (in promise) SyntaxError: Unexpected end of input (at d.. due to no-cors
+  //return response.json(); // causes dtu_sdk.js?v=11:28 Uncaught (in promise) SyntaxError: Unexpected end of input (at d.. due to no-cors
 }
 
 // carrier function for event listener to make named function to be able to remove event listener
@@ -38,30 +38,41 @@ var carrier_function = function(dtu_this) {
   }
 }
 
+const DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS = {
+  'A': {
+    '': 'click', // yes, a.type is ''
+  },
+  'INPUT': {
+    'select-one': 'change',
+    'select-multiple': 'change',
+    'datetime-local': 'change',
+    'date': 'change',
+    'time': 'change',
+    'checkbox': 'change',
+    'radio': 'change',
+    'email': 'change',
+    'password': 'change',
+    'number': 'change',
+    'range': 'change',
+    'file': 'change',
+    'text': 'change',
+    'button': 'click',
+    'submit': 'click',
+    'textarea': 'change',
+  },
+  'BUTTON': {
+    'button': 'click',
+    'submit': 'click',
+  },
+  'SELECT': {},
+  'TEXTAREA': {},
+}
+
 const DEFAULT_CTAG = 'DEMO MVP';
 const DEFAULT_TOPIC = 'default';
 const DEFAULT_DTU_DATASET_ATTRIBUTE = "dtu";
 const DEFAULT_API_URL = 'http://localhost';
-const SUPPORTED_INPUT_TYPES_AND_EVENTS = {
-        'select-one': ['change'],
-        'select-multiple': ['change'],
-        'datetime-local': ['change'],
-        'date': ['change'],
-        'time': ['change'],
-        'checkbox': ['change'],
-        'radio': ['change'],
-        'email': ['change'],
-        'password': ['change'],
-        'number': ['change'],
-        'range': ['change'],
-        'file': ['change'],
-        'text': ['change'],
-        'button': ['click'],
-        'submit': ['click'],
-        'textarea': ['change'],
-        '': ['click'], // anchor
-        undefined: ['click'], // spans, divs, etc.
-      };
+
 //const LISTEN_TO_DEFAULT_EVENTS = true;
 const SUPPORTED_ELEMENT_TAGS = ['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'];
 
@@ -91,7 +102,6 @@ class DoTheyUse {
   constructor(config) {
     this.status = STATUS_NOT_READY;
     this.problem_description = DEFAULT_PROBLEM_DESCRIPTION;
-    this.supported_input_types_and_events = SUPPORTED_INPUT_TYPES_AND_EVENTS;
 
     if (!this.config_is_valid(config)) {
       console.error(this.problem_description);
@@ -227,11 +237,11 @@ class DoTheyUse {
   }
 
   collect_dtu_elements() {
-    const elements_with_data_dtu = document.querySelectorAll('[data-' + this.dtu_attribute + ']') || [];
     let elements_to_listen_to = [];
+    const elements_with_data_dtu = document.querySelectorAll('[data-' + this.dtu_attribute + ']') || [];
     for (let i = 0; i < elements_with_data_dtu.length; i++) {
       let element = elements_with_data_dtu[i];
-      if (SUPPORTED_INPUT_TYPES_AND_EVENTS[element.type]) {
+      if (DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type]) {
         if (!this.has_dtu_children(element))
           elements_to_listen_to.push(element);
       }
@@ -248,14 +258,18 @@ class DoTheyUse {
 
   collect_all_elements() {
     let elements_to_listen_to = [];
+    const supported_tags = Object.keys(DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS);
 
-    for (let i = 0; i < SUPPORTED_ELEMENT_TAGS.length; i++) {
-      let tag = SUPPORTED_ELEMENT_TAGS[i];
+    for (let i = 0; i < supported_tags.length; i++) {
+      let tag = supported_tags[i];
       let elements = document.querySelectorAll(tag);
       for (let j = 0; j < elements.length; j++) {
         let element = elements[j];
-        if (element.type != 'hidden')
+        const supported_tags_types = Object.keys(DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[tag])
+        if (supported_tags_types.includes(element.type))
           elements_to_listen_to.push(element);
+        //else if (element.type != 'hidden')
+        //  console.warn(element)
       }
     }
     //console.log(elements_to_listen_to)
@@ -466,7 +480,7 @@ class DoTheyUse {
   describe() {
     for (let i = 0; i < this.elements_to_listen_to.length; i++) {
       let element = this.elements_to_listen_to[i];
-      let event = this.supported_input_types_and_events[element.type][0];
+      let event = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
       let r = this.process_element_event(element, event);
       this.make_report(r);
 
@@ -505,12 +519,10 @@ class DoTheyUse {
     if (this.elements_to_listen_to.length > 0) { // remove all existing dtu listeners if exist
       for (let i = 0; i < this.elements_to_listen_to.length; i++) {
         let element = this.elements_to_listen_to[i];
-        let events_to_listen = this.supported_input_types_and_events[element.type];
-        for (let j = 0; j < events_to_listen.length; j++) {
-          element.removeEventListener(events_to_listen[j], carrier_function(this), false);
-          if (element.getAttribute("dtu-listened"))
-            element.setAttribute("dtu-listened", false);
-        }
+        let event_to_listen = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
+        element.removeEventListener(event_to_listen, carrier_function(this), false);
+        if (element.getAttribute("dtu-listened"))
+          element.setAttribute("dtu-listened", false);
       }
     }
   }
@@ -528,21 +540,19 @@ class DoTheyUse {
     for (let i = 0; i < this.elements_to_listen_to.length; i++) {
       const element = this.elements_to_listen_to[i];
       try {
-        const events_to_listen = this.supported_input_types_and_events[element.type];
-        for (let j = 0; j < events_to_listen.length; j++) {
-          // Prevention of adding listener to an element which is already being listened:
-          // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
-          if (element.getAttribute("dtu-listened"))
-            continue;
+        const event_to_listen = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
+        // Prevention of adding listener to an element which is already being listened:
+        // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
+        if (element.getAttribute("dtu-listened"))
+          continue;
 
-          element.addEventListener(events_to_listen[j], carrier_function(this), false);
+        element.addEventListener(event_to_listen, carrier_function(this), false);
 
-          // When dtu.listen() is called in order not to listen again already listened elements
-          // and due to no standard in-browser way of knowing if element has any listeners:
-          // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
-          // we add attribute which will allow prevention of listening again:
-          element.setAttribute("dtu-listened", true);
-        }  
+        // When dtu.listen() is called in order not to listen again already listened elements
+        // and due to no standard in-browser way of knowing if element has any listeners:
+        // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
+        // we add attribute which will allow prevention of listening again:
+        element.setAttribute("dtu-listened", true);
       }
       catch (error) {
         console.error("Unsupported element:\n", element, "\n", "element type: ", element.type, error);
@@ -568,6 +578,6 @@ function dotheyuse(config) {
 
 try { // for jest unit tests
   exports.dotheyuse = dotheyuse; 
-  exports.SUPPORTED_INPUT_TYPES_AND_EVENTS = SUPPORTED_INPUT_TYPES_AND_EVENTS;
+  exports.DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS;
 }
 catch (error) {} // to mute an error "Uncaught ReferenceError: exports is not defined" in browser's dev console
