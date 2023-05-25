@@ -33,8 +33,7 @@ async function DTU_RX_API_submint_report(report, api_url) { // https://developer
 // https://stackoverflow.com/questions/256754/how-to-pass-arguments-to-addeventlistener-listener-function
 var curryer_function = function(dtu_this) { 
   return function curried_func(event) {
-    //console.log(dtu_this, event);
-    let r = dtu_this.process_element(event.target);
+    let r = dtu_this.process_element(event.currentTarget); // important for nested elements: we need original, parent element event target, not nested event.target https://developer.mozilla.org/en-US/docs/Web/API/Event/Comparison_of_Event_Targets
     r['event_type'] = event.type;
     dtu_this.send_report(r);
   }
@@ -449,7 +448,6 @@ class DoTheyUse {
   }
 
   describe_element(node) {
-    console.log(node)
     let text = this.get_nested_inner_text(node);
     let inner_text = text;
 
@@ -484,7 +482,7 @@ class DoTheyUse {
     if (node.getAttribute("type") == "hidden")
       return_value['status'] = 'hidden';
 
-    return_value['inner_text'] = text.join(', ');
+    return_value['inner_text'] = text.join('. ');
     if (node.tagName == 'A') {
       return_value['href'] = node.getAttribute("href");
       return_value['value'] = inner_text.join(', ');
