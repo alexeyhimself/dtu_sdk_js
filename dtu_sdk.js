@@ -31,7 +31,7 @@ async function DTU_RX_API_submint_report(report, api_url) { // https://developer
 
 // carrier function for event listener to make named function to be able to remove event listener
 // https://stackoverflow.com/questions/256754/how-to-pass-arguments-to-addeventlistener-listener-function
-var carrier_function = function(dtu_this) { 
+var curryer_function = function(dtu_this) { 
   return function curried_func(event) {
     //console.log(dtu_this, event);
     let r = dtu_this.process_element(event.target);
@@ -249,7 +249,7 @@ class DoTheyUse {
     for (let i = 0; i < elements_with_data_dtu.length; i++) {
       let element = elements_with_data_dtu[i];
       if (DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type]) {
-        if (!this.has_dtu_children(element) && element.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE + 'Skip'] === undefined)
+        if (!this.has_dtu_children(element) && element.dataset[this.dtu_attribute + 'Skip'] === undefined)
           elements_to_listen_to.push(element);
       }
       else {
@@ -273,7 +273,7 @@ class DoTheyUse {
       for (let j = 0; j < elements.length; j++) {
         let element = elements[j];
         const supported_tags_types = Object.keys(DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[tag])
-        if (supported_tags_types.includes(element.type) && element.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE + 'Skip'] === undefined) {
+        if (supported_tags_types.includes(element.type) && element.dataset[this.dtu_attribute + 'Skip'] === undefined) {
           elements_to_listen_to.push(element);
         }
         //else if (element.type != 'hidden')
@@ -449,6 +449,7 @@ class DoTheyUse {
   }
 
   describe_element(node) {
+    console.log(node)
     let text = this.get_nested_inner_text(node);
     let inner_text = text;
 
@@ -458,8 +459,8 @@ class DoTheyUse {
     return_value['value'] = node.value;
 
     if (node.dataset) {
-      if (node.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE]) 
-        text = [node.dataset['dtu']]; // if manually set dtu tag, then use its value
+      if (node.dataset[this.dtu_attribute]) 
+        text = [node.dataset[this.dtu_attribute]]; // if manually set dtu tag, then use its value
     }
 
     if (text.length == 0 || (text.length == 1 && text[0] == '')) {
@@ -477,7 +478,7 @@ class DoTheyUse {
     }
 
     if (node.dataset) {
-      if (node.dataset[DEFAULT_DTU_DATASET_ATTRIBUTE + 'Skip'] !== undefined)
+      if (node.dataset[this.dtu_attribute + 'Skip'] !== undefined)
         return_value['status'] = 'skip'; // in the end to override any statuses because skip is priority
     }
     if (node.getAttribute("type") == "hidden")
@@ -552,20 +553,20 @@ class DoTheyUse {
     console.log('Totally:', this.elements_to_listen_to.length, 'element(s)');
   }
 
-  unlisten() {
+  unlisten() { // https://stackoverflow.com/questions/55650739/how-to-remove-event-listener-with-currying-function
     if (this.elements_to_listen_to.length > 0) { // remove all existing dtu listeners if exist
       for (let i = 0; i < this.elements_to_listen_to.length; i++) {
         let element = this.elements_to_listen_to[i];
         let event_to_listen = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
-        element.removeEventListener(event_to_listen, carrier_function(this), false);
-        if (element.getAttribute("dtu-listened"))
-          element.setAttribute("dtu-listened", false);
+        element.removeEventListener(event_to_listen, curried_func, false);
+        if (element.dataset[this.dtu_attribute + "Listened"] == "true")
+          element.dataset[this.dtu_attribute + "Listened"] = "false";
       }
     }
   }
 
   listen() {
-    this.unlisten();
+    //this.unlisten();
 
     if (this.get_mode() == 'manual')
       this.elements_to_listen_to = this.collect_dtu_elements();
@@ -580,16 +581,17 @@ class DoTheyUse {
         const event_to_listen = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
         // Prevention of adding listener to an element which is already being listened:
         // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
-        if (element.getAttribute("dtu-listened"))
+        if (element.dataset[this.dtu_attribute + "Listened"] == "true")
           continue;
 
-        element.addEventListener(event_to_listen, carrier_function(this), false);
+        element.addEventListener(event_to_listen, curryer_function(this), false);
 
         // When dtu.listen() is called in order not to listen again already listened elements
         // and due to no standard in-browser way of knowing if element has any listeners:
         // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
         // we add attribute which will allow prevention of listening again:
-        element.setAttribute("dtu-listened", true);
+        //element.setAttribute("data-dtu-listened", true);
+        element.dataset[this.dtu_attribute + "Listened"] = "true";
       }
       catch (error) {
         console.error("Unsupported element:\n", element, "\n", "element type: ", element.type, error);
