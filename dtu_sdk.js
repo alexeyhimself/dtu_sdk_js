@@ -396,22 +396,34 @@ class DoTheyUse {
     if (!accumulator)
       accumulator = [];
 
-    if (node.nodeType === 3) {// 3 == text node
-      let node_text = node.nodeValue.trim();
-      if (node_text != '') {
-        accumulator.push(node_text);
+    let dtu_skip = undefined;
+    if (node.dataset)
+      if (node.dataset[this.dtu_attribute + "Skip"] !== undefined)
+        dtu_skip = true;
+    
+    if (!dtu_skip) {
+      if (node.nodeType === 3) {// 3 == text node
+        //console.log(3)
+        let node_text = node.nodeValue.trim();
+        if (node_text != '') {
+          accumulator.push(node_text);
+        }
+      }
+      else {
+        //console.log(4, node)
+        if (node.getAttribute("aria-label")) {
+          accumulator.push(node.getAttribute("aria-label").trim());
+        }
+        else if (node.innerText) {
+          accumulator.push(node.innerText.trim());
+        }
+        else if (node.childNodes) {
+          for (let child of node.childNodes)
+            this.get_nested_inner_text(child, accumulator)
+        }
       }
     }
-    else {
-      if (node.childNodes) {
-        for (let child of node.childNodes)
-          this.get_nested_inner_text(child, accumulator)
-      }
-      else if (node.innerText) {
-        accumulator.push(node.innerText);
-      }
-    }
-
+    //console.log(accumulator)
     return accumulator;
   }
 
