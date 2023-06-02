@@ -477,9 +477,11 @@ class DoTheyUse {
       return_value['status'] = 'no_inner_text'
       
       const outer_text_type_and_tag = this.get_nested_outer_text_type_and_tag(node);
-      text.push(outer_text_type_and_tag['outer_text']);
-      return_value['element_type'] = outer_text_type_and_tag['element_type'];
-      return_value['tag'] = outer_text_type_and_tag['tag'];
+      if (outer_text_type_and_tag['outer_text'] !== '') {
+        text.push(outer_text_type_and_tag['outer_text']);
+        return_value['element_type'] = outer_text_type_and_tag['element_type'];
+        return_value['tag'] = outer_text_type_and_tag['tag'];
+      }
     
       if (![undefined, null, ''].includes(text[0]))
         return_value['status'] = 'inner_text_substitute';
