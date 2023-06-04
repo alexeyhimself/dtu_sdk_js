@@ -4,7 +4,7 @@
 const DEFAULT_OPERATION_MODE = 'auto';
 
 let REAL_OPERATION = true;
-if (['--', 'dotheyuse.com'].includes(window.location.hostname))
+if (['', 'dotheyuse.com'].includes(window.location.hostname))
   REAL_OPERATION = false;
 
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
@@ -396,38 +396,45 @@ class DoTheyUse {
     if (!accumulator)
       accumulator = [];
 
-    let dtu_skip = undefined;
     if (node.dataset)
       if (node.dataset[this.dtu_attribute + "Skip"] !== undefined)
-        dtu_skip = true;
+        return accumulator;
     
-    if (!dtu_skip) {
-      if (node.nodeType === 3) {// 3 == text node
-        //console.log(3)
-        let node_text = node.nodeValue.trim();
-        if (node_text != '') {
-          accumulator.push(node_text);
-        }
-      }
-      else {
-        //console.log(4, node)
-        if (node.getAttribute("aria-label")) {
-          accumulator.push(node.getAttribute("aria-label").trim());
-        }
-        else if (node.innerText) {
-          accumulator.push(node.innerText.trim());
-        }
-        else if (node.childNodes) {
-          for (let child of node.childNodes)
-            this.get_nested_inner_text(child, accumulator)
-        }
+    if (node.nodeType === 3) {// 3 == text node
+      let node_text = node.nodeValue.trim();
+      if (node_text != '') {
+        accumulator.push(node_text);
       }
     }
+    else {
+      if (node.getAttribute("aria-label")) {
+        accumulator.push(node.getAttribute("aria-label").trim());
+      }
+      else if (node.innerText) {
+        accumulator.push(node.innerText.trim());
+      }
+      else if (node.childNodes) {
+        for (let child of node.childNodes)
+          this.get_nested_inner_text(child, accumulator)
+      }
+    }
+
     //console.log(accumulator)
     return accumulator;
   }
 
-  get_nested_outer_text_type_and_tag(node) {
+  get_text(node) {
+    let outer_text = node.innerText;
+    for (; node && node !== document; node = node.parentNode ) { // https://gomakethings.com/how-to-get-all-parent-elements-with-vanilla-javascript/#1-get-all-parents
+      outer_text = this.get_nested_inner_text(node);
+      if (outer_text != '')
+        break;
+    }
+    return {'outer_text': outer_text};
+  }
+
+  /*
+  get_nested_outer_text_type_and_tag1(node) {
     let outer_text = node.innerText;
     let element_type = node.type;
     let tag = node.tagName;
@@ -449,24 +456,28 @@ class DoTheyUse {
         outer_text = node.getAttribute("aria-label");
         break;
       }
+      else if (node.tagName == 'A') {
+        outer_text = this.prettify_url(node.getAttribute("href"));
+        break;
+      }
       else {
-        if (node.tagName == 'A') {
-          outer_text = this.prettify_url(node.getAttribute("href"));
-          break;
-        }
+        outer_text = this.get_nested_inner_text(node);
+        console.log('here', outer_text)
+        break;
       }
     }
     return {'outer_text': outer_text, 'element_type': element_type, 'tag': tag};
   }
+  */
 
   describe_element(node) {
-    let text = this.get_nested_inner_text(node);
-    let inner_text = text;
-
     let return_value = {};
     return_value['element_type'] = node.type;
     return_value['tag'] = node.tagName;
     return_value['value'] = node.value;
+
+    let text = this.get_nested_inner_text(node);
+    let inner_text = text;
 
     if (node.dataset) {
       if (node.dataset[this.dtu_attribute]) 
@@ -476,11 +487,11 @@ class DoTheyUse {
     if (text.length == 0 || (text.length == 1 && text[0] == '')) {
       return_value['status'] = 'no_inner_text'
       
-      const outer_text_type_and_tag = this.get_nested_outer_text_type_and_tag(node);
+      const outer_text_type_and_tag = this.get_text(node);
       if (outer_text_type_and_tag['outer_text'] !== '') {
         text.push(outer_text_type_and_tag['outer_text']);
-        return_value['element_type'] = outer_text_type_and_tag['element_type'];
-        return_value['tag'] = outer_text_type_and_tag['tag'];
+        //return_value['element_type'] = outer_text_type_and_tag['element_type'];
+        //return_value['tag'] = outer_text_type_and_tag['tag'];
       }
     
       if (![undefined, null, ''].includes(text[0]))
@@ -507,6 +518,10 @@ class DoTheyUse {
       else
         return_value['value'] = node.value;
     }
+    else if (node.tagName == 'INPUT') {
+      if (node.type == 'checkbox' || node.type == 'radio')
+        return_value['checked'] = node.checked;
+    }
 
     if (!return_value['status'])
       return_value['status'] = 'ok';
@@ -515,15 +530,22 @@ class DoTheyUse {
   }
 
   d() {
+    let stats = {};
     for (let i = 0; i < SUPPORTED_ELEMENT_TAGS.length; i++) {
       let tag = SUPPORTED_ELEMENT_TAGS[i];
       let found_tags = document.querySelectorAll(tag);
       for (let j = 0; j < found_tags.length; j++) {
         let each_tag = found_tags[j];
-        let inner_text = this.describe_element(each_tag)
-        console.log(inner_text)
+        let element_description = this.describe_element(each_tag)
+        console.log(element_description, each_tag)
+        
+        if (element_description.status in stats)
+          stats[element_description.status] += 1;
+        else
+          stats[element_description.status] = 1;
       }
     }
+    console.log(stats);
   } 
 
   describe() {
