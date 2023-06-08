@@ -109,10 +109,14 @@ class DoTheyUse {
     this.status = STATUS_NOT_READY;
     this.problem_description = DEFAULT_PROBLEM_DESCRIPTION;
 
+    /*
     if (!this.config_is_valid(config)) {
       console.error(this.problem_description);
       return;
     }
+    */
+    if (!config)
+      config = {};
 
     this.mode = config.mode || DEFAULT_OPERATION_MODE; 
     this.ctag = config.ctag || DEFAULT_CTAG;
@@ -134,6 +138,13 @@ class DoTheyUse {
       this.listen();
     */
     this.status = STATUS_READY;
+  }
+
+  set_topic(topic) {
+    this.topic = topic;
+  }
+  get_topic() {
+    return this.topic;
   }
 
   set_mode(mode) {
@@ -189,6 +200,7 @@ class DoTheyUse {
     return this.create_synthetic_ugids();
   }
 
+  /*
   config_is_valid(config) {
     if (!config) {
       this.problem_description = "dotheyuse not working: config was not provided durinig initialization. ";
@@ -202,6 +214,7 @@ class DoTheyUse {
       return true;
     }
   }
+  */
 
   init_report() {
     this.report = {};
@@ -654,3 +667,5 @@ try { // for jest unit tests
   exports.DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS;
 }
 catch (error) {} // to mute an error "Uncaught ReferenceError: exports is not defined" in browser's dev console
+
+const dtu = dotheyuse();
