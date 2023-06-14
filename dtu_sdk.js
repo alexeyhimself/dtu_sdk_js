@@ -1,11 +1,7 @@
 //const excluded_events = "mousedown mouseup mousemove mouseover mouseout mousewheel";
 //const events = "click focus blur keydown change dblclick keydown keyup keypress textInput touchstart touchmove touchend touchcancel resize scroll zoom select change submit reset".split(" ");
 
-const DEFAULT_OPERATION_MODE = 'auto';
-
-let REAL_OPERATION = true;
-if (['', 'dotheyuse.com'].includes(window.location.hostname))
-  REAL_OPERATION = false;
+const REAL_BACKEND_OPERATION = true; // default is true
 
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
@@ -74,6 +70,8 @@ const DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS = {
   },
 }
 
+const DEFAULT_OPERATION_MODE = 'auto';
+
 const DEFAULT_CTAG = 'DEMO MVP';
 const DEFAULT_TOPIC = 'default';
 const DEFAULT_DTU_DATASET_ATTRIBUTE = "dtu";
@@ -85,7 +83,7 @@ const SUPPORTED_ELEMENT_TAGS = ['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'];
 let DEFAULT_CALLBACK = console.log;
 let DEFAULT_UID = 'you@example.com';
 
-if (REAL_OPERATION) {
+if (REAL_BACKEND_OPERATION) {
   DEFAULT_CALLBACK = DTU_RX_API_submint_report;
   const uid_ms = Date.now(new Date()); // timestamp as unique UID
   const uid_s = Math.floor(uid_ms / 1000); // UID in seconds to make it shorter
@@ -585,7 +583,7 @@ class DoTheyUse {
         console.log('page url:', url);
         console.log('page title:', this.report.page_title);
         console.log('callback:', this.callback);
-        if (REAL_OPERATION)
+        if (REAL_BACKEND_OPERATION)
           console.log('API url:', this.api_url);
         console.log('');
       }
