@@ -3,7 +3,9 @@ import os
 
 MINIMUM_COVERAGE_PERCENT = 60
 
-os.system('npx jest --coverage')
+test_run_exit_code = os.system('npx jest --coverage')
+if test_run_exit_code != 0:
+	exit(test_run_exit_code)
 
 f = open('coverage/coverage-final.json')
 data = json.load(f)

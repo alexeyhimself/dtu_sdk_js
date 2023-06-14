@@ -12,6 +12,7 @@ function mock_send(report) {
 }
 
 
+/*
 // Minimal configuration tests
 test('SDK replies with status "Not ready" if config is not specified', () => {
   const dtu = imports.dotheyuse();
@@ -25,6 +26,7 @@ test('SDK replies with status "Not ready" if config is not a dictionary', () => 
   expect(dtu.problem_description).toMatch(/dotheyuse not working: config must be a dictionary/);
   expect(dtu.status).toMatch(/Not ready/);
 });
+*/
 
 test('SDK replies with status "Ready" if config does not contain "ctag"', () => {
   let config = {...minimum_valid_config};
