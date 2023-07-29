@@ -104,18 +104,17 @@ const DEFAULT_UGIDS = ['Visitor'];
 
 class DoTheyUse {
   constructor(config) {
-    this.status = STATUS_NOT_READY;
-    this.problem_description = DEFAULT_PROBLEM_DESCRIPTION;
+    this._status = STATUS_NOT_READY;
+    this._problem_description = DEFAULT_PROBLEM_DESCRIPTION;
 
-    /*
-    if (!this.config_is_valid(config)) {
-      console.error(this.problem_description);
+    if (!config) {
+      config = {};
+    }
+    else if (!this.config_is_valid(config)) {
+      console.error(this._problem_description);
       return;
     }
-    */
-    if (!config)
-      config = {};
-
+    
     this._mode = config.mode || DEFAULT_OPERATION_MODE; 
     this._ctag = config.ctag || DEFAULT_CTAG;
     this._topic = config.topic || DEFAULT_TOPIC;
@@ -138,6 +137,13 @@ class DoTheyUse {
     this._status = STATUS_READY;
   }
 
+  set ctag(ctag) {
+    this._ctag = ctag;
+  }
+  get ctag() {
+    return this._ctag;
+  }
+
   set topic(topic) {
     this._topic = topic;
   }
@@ -151,6 +157,13 @@ class DoTheyUse {
   }
   get mode() {
     return this._mode;
+  }
+
+  set callback(callback) {
+    this._callback = callback;
+  }
+  get callback() {
+    return this._callback;
   }
 
   set uid(uid) {
@@ -195,21 +208,13 @@ class DoTheyUse {
     return this.create_synthetic_ugids();
   }
 
-  /*
   config_is_valid(config) {
-    if (!config) {
-      this.problem_description = "dotheyuse not working: config was not provided durinig initialization. ";
-      return false;
-    }
-    else if (config.constructor !== Object) {
-      this.problem_description = "dotheyuse not working: config must be a dictionary, but given a: " + typeof(config);
-      return false;
-    }
-    else {
+    if (config.constructor === Object)
       return true;
-    }
+
+    this._problem_description = "DOTHEYUSE is not working: config must be a dictionary, but given a: " + typeof(config);
+    return false;
   }
-  */
 
   init_report() {
     this.report = {};
