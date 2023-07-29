@@ -96,24 +96,19 @@ else {
     console.warn("DTU_RX_API_submint_report_simulation is undefined. Setting 'console.log' as DEFAULT_CALLBACK");
 }
 
-const DEFAULT_PROBLEM_DESCRIPTION = '';
-const STATUS_NOT_READY = 'Not ready. See problem description above';
+const STATUS_DEFAULT = 'Not ready';
 const STATUS_READY = 'Ready';
 const DEFAULT_UGIDS = ['Visitor'];
 
 
 class DoTheyUse {
   constructor(config) {
-    this._status = STATUS_NOT_READY;
-    this._problem_description = DEFAULT_PROBLEM_DESCRIPTION;
+    this._status = STATUS_DEFAULT;
 
-    if (!config) {
+    if (!config)
       config = {};
-    }
-    else if (!this.config_is_valid(config)) {
-      console.error(this._problem_description);
+    else if (!this.config_is_valid(config))
       return;
-    }
     
     this._mode = config.mode || DEFAULT_OPERATION_MODE; 
     this._ctag = config.ctag || DEFAULT_CTAG;
@@ -124,6 +119,7 @@ class DoTheyUse {
     this._uid = this.get_synthetic_uid();
     this._ugids = this.get_synthetic_ugids();
     this._elements_to_listen_to = [];
+    this._elements_listeners_map = {};
 
     /*
     if ([true, false].includes(config.listen))
@@ -212,7 +208,8 @@ class DoTheyUse {
     if (config.constructor === Object)
       return true;
 
-    this._problem_description = "DOTHEYUSE is not working: config must be a dictionary, but given a: " + typeof(config);
+    const problem_description = "DOTHEYUSE is not working: config must be a dictionary, but given a: " + typeof(config);
+    console.error(problem_description);
     return false;
   }
 
@@ -605,9 +602,10 @@ class DoTheyUse {
       for (let i = 0; i < this._elements_to_listen_to.length; i++) {
         let element = this._elements_to_listen_to[i];
         let event_to_listen = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
-        element.removeEventListener(event_to_listen, curried_func, false);
-        if (element.dataset[this._dtu_attribute + "Listened"] == "true")
-          element.dataset[this._dtu_attribute + "Listened"] = "false";
+        let listener_id = element.dataset[this._dtu_attribute + "Listened"];
+        let a = this._elements_listeners_map[parseInt(listener_id)];
+        element.removeEventListener(event_to_listen, a, false);
+        element.removeAttribute("data-" + this._dtu_attribute + "-listened");
       }
     }
   }
@@ -632,17 +630,24 @@ class DoTheyUse {
         const event_to_listen = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
         // Prevention of adding listener to an element which is already being listened:
         // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
-        if (element.dataset[this._dtu_attribute + "Listened"] == "true")
+        if (element.dataset[this._dtu_attribute + "Listened"] !== undefined)
           continue;
 
-        element.addEventListener(event_to_listen, curryer_function(this), false);
+        let a = curryer_function(this);
+        element.addEventListener(event_to_listen, a, false);
+        //element.removeEventListener(event_to_listen, a, false);
+        const listener_id = Object.keys(this._elements_listeners_map).length + 1;
+        this._elements_listeners_map[listener_id] = a;
+
+        //let b = this._elements_listeners_map[parseInt(listener_id)];
+        //element.removeEventListener(event_to_listen, b, false);
 
         // When dtu.listen() is called in order not to listen again already listened elements
         // and due to no standard in-browser way of knowing if element has any listeners:
         // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
         // we add attribute which will allow prevention of listening again:
         //element.setAttribute("data-dtu-listened", true);
-        element.dataset[this._dtu_attribute + "Listened"] = "true";
+        element.dataset[this._dtu_attribute + "Listened"] = listener_id;
       }
       catch (error) {
         console.error("Unsupported element:\n", element, "\n", "element type: ", element.type, error);
