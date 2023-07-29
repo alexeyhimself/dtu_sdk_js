@@ -116,15 +116,15 @@ class DoTheyUse {
     if (!config)
       config = {};
 
-    this.mode = config.mode || DEFAULT_OPERATION_MODE; 
-    this.ctag = config.ctag || DEFAULT_CTAG;
-    this.topic = config.topic || DEFAULT_TOPIC;
-    this.dtu_attribute = config.dtu_attribute || DEFAULT_DTU_DATASET_ATTRIBUTE;
-    this.api_url = config.api_url || DEFAULT_API_URL;
-    this.callback = config.callback || DEFAULT_CALLBACK;
-    this.uid = this.get_synthetic_uid();
-    this.ugids = this.get_synthetic_ugids();
-    this.elements_to_listen_to = [];
+    this._mode = config.mode || DEFAULT_OPERATION_MODE; 
+    this._ctag = config.ctag || DEFAULT_CTAG;
+    this._topic = config.topic || DEFAULT_TOPIC;
+    this._dtu_attribute = config.dtu_attribute || DEFAULT_DTU_DATASET_ATTRIBUTE;
+    this._api_url = config.api_url || DEFAULT_API_URL;
+    this._callback = config.callback || DEFAULT_CALLBACK;
+    this._uid = this.get_synthetic_uid();
+    this._ugids = this.get_synthetic_ugids();
+    this._elements_to_listen_to = [];
 
     /*
     if ([true, false].includes(config.listen))
@@ -135,41 +135,38 @@ class DoTheyUse {
     if (this.listen_default_events)
       this.listen();
     */
-    this.status = STATUS_READY;
+    this._status = STATUS_READY;
   }
 
-  set_topic(topic) {
-    this.topic = topic;
+  set topic(topic) {
+    this._topic = topic;
   }
-  get_topic() {
-    return this.topic;
+  get topic() {
+    return this._topic;
   }
 
-  set_mode(mode) {
-    this.mode = mode;
+  set mode(mode) {
+    this._mode = mode;
     this.listen(); // to reload what is listened
   }
-
-  get_mode() {
-    return this.mode;
+  get mode() {
+    return this._mode;
   }
 
-  set_uid(uid) {
-    this.uid = uid;
+  set uid(uid) {
+    this._uid = uid;
     localStorage.removeItem('synthetic_uid');
   }
+  get uid() {
+    return this._uid;
+  }
 
-  set_ugids(ugids) {
-    this.ugids = ugids;
+  set ugids(ugids) {
+    this._ugids = ugids;
     localStorage.removeItem('synthetic_ugids');
   }
-
-  get_uid() {
-    return this.uid;
-  }
-
-  get_ugids() {
-    return this.ugids;
+  get ugids() {
+    return this._ugids;
   }
 
   create_synthetic_uid() {
@@ -245,7 +242,7 @@ class DoTheyUse {
   }
 
   send_report_to_dtu_api() {
-    return this.callback(this.report, this.api_url);
+    return this._callback(this.report, this._api_url);
   }
 
   send_report(r) {
@@ -255,11 +252,11 @@ class DoTheyUse {
 
   collect_dtu_elements() {
     let elements_to_listen_to = [];
-    const elements_with_data_dtu = document.querySelectorAll('[data-' + this.dtu_attribute + ']') || [];
+    const elements_with_data_dtu = document.querySelectorAll('[data-' + this._dtu_attribute + ']') || [];
     for (let i = 0; i < elements_with_data_dtu.length; i++) {
       let element = elements_with_data_dtu[i];
       if (DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type]) {
-        if (!this.has_dtu_children(element) && element.dataset[this.dtu_attribute + 'Skip'] === undefined)
+        if (!this.has_dtu_children(element) && element.dataset[this._dtu_attribute + 'Skip'] === undefined)
           elements_to_listen_to.push(element);
       }
       else {
@@ -283,7 +280,7 @@ class DoTheyUse {
       for (let j = 0; j < elements.length; j++) {
         let element = elements[j];
         const supported_tags_types = Object.keys(DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[tag])
-        if (supported_tags_types.includes(element.type) && element.dataset[this.dtu_attribute + 'Skip'] === undefined) {
+        if (supported_tags_types.includes(element.type) && element.dataset[this._dtu_attribute + 'Skip'] === undefined) {
           elements_to_listen_to.push(element);
         }
         //else if (element.type != 'hidden')
@@ -408,7 +405,7 @@ class DoTheyUse {
       accumulator = [];
 
     if (node.dataset)
-      if (node.dataset[this.dtu_attribute + "Skip"] !== undefined)
+      if (node.dataset[this._dtu_attribute + "Skip"] !== undefined)
         return accumulator;
     
     if (node.nodeType === 3) {// 3 == text node
@@ -491,8 +488,8 @@ class DoTheyUse {
     let inner_text = text;
 
     if (node.dataset) {
-      if (node.dataset[this.dtu_attribute]) 
-        text = [node.dataset[this.dtu_attribute]]; // if manually set dtu tag, then use its value
+      if (node.dataset[this._dtu_attribute]) 
+        text = [node.dataset[this._dtu_attribute]]; // if manually set dtu tag, then use its value
     }
 
     if (text.length == 0 || (text.length == 1 && text[0] == '')) {
@@ -512,7 +509,7 @@ class DoTheyUse {
     }
 
     if (node.dataset) {
-      if (node.dataset[this.dtu_attribute + 'Skip'] !== undefined)
+      if (node.dataset[this._dtu_attribute + 'Skip'] !== undefined)
         return_value['status'] = 'skip'; // in the end to override any statuses because skip is priority
     }
     if (node.getAttribute("type") == "hidden")
@@ -560,8 +557,8 @@ class DoTheyUse {
   } 
 
   describe() {
-    for (let i = 0; i < this.elements_to_listen_to.length; i++) {
-      let element = this.elements_to_listen_to[i];
+    for (let i = 0; i < this._elements_to_listen_to.length; i++) {
+      let element = this._elements_to_listen_to[i];
       let event_type = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
       let r = this.process_element(element);
       r['event_type'] = event_type;
@@ -582,9 +579,9 @@ class DoTheyUse {
 
         console.log('page url:', url);
         console.log('page title:', this.report.page_title);
-        console.log('callback:', this.callback);
+        console.log('callback:', this._callback);
         if (REAL_BACKEND_OPERATION)
-          console.log('API url:', this.api_url);
+          console.log('API url:', this._api_url);
         console.log('');
       }
 
@@ -595,38 +592,42 @@ class DoTheyUse {
 
       console.log('')
     }
-    console.log('Totally:', this.elements_to_listen_to.length, 'element(s)');
+    console.log('Totally:', this._elements_to_listen_to.length, 'element(s)');
   }
 
   unlisten() { // https://stackoverflow.com/questions/55650739/how-to-remove-event-listener-with-currying-function
-    if (this.elements_to_listen_to.length > 0) { // remove all existing dtu listeners if exist
-      for (let i = 0; i < this.elements_to_listen_to.length; i++) {
-        let element = this.elements_to_listen_to[i];
+    if (this._elements_to_listen_to.length > 0) { // remove all existing dtu listeners if exist
+      for (let i = 0; i < this._elements_to_listen_to.length; i++) {
+        let element = this._elements_to_listen_to[i];
         let event_to_listen = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
         element.removeEventListener(event_to_listen, curried_func, false);
-        if (element.dataset[this.dtu_attribute + "Listened"] == "true")
-          element.dataset[this.dtu_attribute + "Listened"] = "false";
+        if (element.dataset[this._dtu_attribute + "Listened"] == "true")
+          element.dataset[this._dtu_attribute + "Listened"] = "false";
       }
     }
   }
 
   listen() {
+    // do not listen if not yet ready: if in setup yet or if broken
+    if (this._status != STATUS_READY)
+      return;
+
     //this.unlisten();
 
-    if (this.get_mode() == 'manual')
-      this.elements_to_listen_to = this.collect_dtu_elements();
+    if (this.mode == 'manual')
+      this._elements_to_listen_to = this.collect_dtu_elements();
     else
-      this.elements_to_listen_to = this.collect_all_elements();
+      this._elements_to_listen_to = this.collect_all_elements();
 
-    //console.log(this.elements_to_listen_to.length)
+    //console.log(this._elements_to_listen_to.length)
 
-    for (let i = 0; i < this.elements_to_listen_to.length; i++) {
-      const element = this.elements_to_listen_to[i];
+    for (let i = 0; i < this._elements_to_listen_to.length; i++) {
+      const element = this._elements_to_listen_to[i];
       try {
         const event_to_listen = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
         // Prevention of adding listener to an element which is already being listened:
         // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
-        if (element.dataset[this.dtu_attribute + "Listened"] == "true")
+        if (element.dataset[this._dtu_attribute + "Listened"] == "true")
           continue;
 
         element.addEventListener(event_to_listen, curryer_function(this), false);
@@ -636,7 +637,7 @@ class DoTheyUse {
         // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
         // we add attribute which will allow prevention of listening again:
         //element.setAttribute("data-dtu-listened", true);
-        element.dataset[this.dtu_attribute + "Listened"] = "true";
+        element.dataset[this._dtu_attribute + "Listened"] = "true";
       }
       catch (error) {
         console.error("Unsupported element:\n", element, "\n", "element type: ", element.type, error);
