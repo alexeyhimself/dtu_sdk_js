@@ -36,6 +36,7 @@ var curryer_function = function(dtu_this) {
 }
 
 const DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS = {
+  /**/
   'A': {
     '': 'click', // yes, a.type is ''
   },
@@ -61,13 +62,16 @@ const DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS = {
     'button': 'click',
     'submit': 'click',
   },
+  /**/
   'SELECT': {
     'select-one': 'change',
     'select-multiple': 'change',
   },
+  /**/
   'TEXTAREA': {
     'textarea': 'change',
   },
+  /**/
 }
 
 const DEFAULT_OPERATION_MODE = 'auto';
@@ -419,7 +423,12 @@ class DoTheyUse {
         accumulator.push(node.getAttribute("aria-label").trim());
       }
       else if (node.innerText) {
-        accumulator.push(node.innerText.trim());
+        if (node.tagName == "SELECT") {
+          return accumulator;
+        }
+        else {
+          accumulator.push(node.innerText.trim());
+        }
       }
       else if (node.childNodes) {
         for (let child of node.childNodes)
@@ -431,13 +440,29 @@ class DoTheyUse {
     return accumulator;
   }
 
-  get_text(node) {
-    let outer_text = node.innerText;
+  /*
+  get_text(node) { // previousSibling
+    //let outer_text = node.innerText;
+    let outer_text = '';
     for (; node && node !== document; node = node.parentNode ) { // https://gomakethings.com/how-to-get-all-parent-elements-with-vanilla-javascript/#1-get-all-parents
       outer_text = this.get_nested_inner_text(node);
       if (outer_text != '')
         break;
     }
+    //debugger
+    return {'outer_text': outer_text};
+  }
+  */
+  get_outer_text(node) {
+    let previous_node = node.previousSibling;
+    let outer_text = '';
+    while (previous_node) {
+      outer_text = this.get_nested_inner_text(previous_node);
+      if (outer_text != '')
+        break;
+      previous_node = previous_node.previousSibling;
+    }
+    
     return {'outer_text': outer_text};
   }
 
@@ -457,8 +482,8 @@ class DoTheyUse {
 
     if (text.length == 0 || (text.length == 1 && text[0] == '')) {
       return_value['status'] = 'no_inner_text'
-      
-      const outer_text_type_and_tag = this.get_text(node);
+
+      const outer_text_type_and_tag = this.get_outer_text(node);
       if (outer_text_type_and_tag['outer_text'] !== '') {
         text.push(outer_text_type_and_tag['outer_text']);
         //return_value['element_type'] = outer_text_type_and_tag['element_type'];
@@ -545,6 +570,7 @@ class DoTheyUse {
         console.log('callback:', this._callback);
         if (REAL_BACKEND_OPERATION)
           console.log('API url:', this._api_url);
+        console.log('mode:', this._mode);
         console.log('');
       }
 
@@ -615,6 +641,8 @@ class DoTheyUse {
         element.parentElement.parentElement.className = 'unsupported'; // for story book highlight and for auto test
       }
     }
+
+    dtu.describe();
   }
 }
 
