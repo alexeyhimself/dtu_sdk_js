@@ -121,15 +121,6 @@ class DoTheyUse {
     this._elements_to_listen_to = [];
     this._elements_listeners_map = {};
 
-    /*
-    if ([true, false].includes(config.listen))
-      this.listen_default_events = config.listen;
-    else
-      this.listen_default_events = LISTEN_TO_DEFAULT_EVENTS;
-
-    if (this.listen_default_events)
-      this.listen();
-    */
     this._status = STATUS_READY;
   }
 
@@ -243,13 +234,20 @@ class DoTheyUse {
     this.enrich_report(r);
   }
 
-  send_report_to_dtu_api() {
-    return this._callback(this.report, this._api_url);
+  send_report_to_callbacks() {
+    let callbacks = this._callback;
+    if (!Array.isArray(this._callback))
+      callbacks = [this._callback];
+
+    for (let i in callbacks) {
+      let callback = callbacks[i];
+      callback(this.report, this._api_url);
+    }
   }
 
   send_report(r) {
     this.make_report(r);
-    return this.send_report_to_dtu_api();
+    return this.send_report_to_callbacks();
   }
 
   collect_dtu_elements() {
@@ -443,43 +441,6 @@ class DoTheyUse {
     return {'outer_text': outer_text};
   }
 
-  /*
-  get_nested_outer_text_type_and_tag1(node) {
-    let outer_text = node.innerText;
-    let element_type = node.type;
-    let tag = node.tagName;
-    for (; node && node !== document; node = node.parentNode ) { // https://gomakethings.com/how-to-get-all-parent-elements-with-vanilla-javascript/#1-get-all-parents
-      element_type = node.type;
-      tag = node.tagName;
-      if (node.nodeType === 3) {// 3 == text node
-        let node_text = node.nodeValue.trim();
-        if (node_text != '') {
-          outer_text = node_text;
-          break;
-        }
-        else if (node.getAttribute("aria-label")) { // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label
-          outer_text = node.getAttribute("aria-label");
-          break;
-        }
-      }
-      else if (node.getAttribute("aria-label")) { // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label
-        outer_text = node.getAttribute("aria-label");
-        break;
-      }
-      else if (node.tagName == 'A') {
-        outer_text = this.prettify_url(node.getAttribute("href"));
-        break;
-      }
-      else {
-        outer_text = this.get_nested_inner_text(node);
-        console.log('here', outer_text)
-        break;
-      }
-    }
-    return {'outer_text': outer_text, 'element_type': element_type, 'tag': tag};
-  }
-  */
-
   describe_element(node) {
     let return_value = {};
     return_value['element_type'] = node.type;
@@ -595,6 +556,10 @@ class DoTheyUse {
       console.log('')
     }
     console.log('Totally:', this._elements_to_listen_to.length, 'element(s)');
+  }
+
+  stop() {
+    this.unlisten();
   }
 
   unlisten() { // https://stackoverflow.com/questions/55650739/how-to-remove-event-listener-with-currying-function
