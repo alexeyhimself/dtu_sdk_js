@@ -25,7 +25,7 @@ async function DTU_RX_API_submint_report(report, api_url) { // https://developer
   //return response.json(); // causes dtu_sdk.js?v=11:28 Uncaught (in promise) SyntaxError: Unexpected end of input (at d.. due to no-cors
 }
 
-// carrier function for event listener to make named function to be able to remove event listener
+// curryer function for event listener to make named function to be able to remove event listener
 // https://stackoverflow.com/questions/256754/how-to-pass-arguments-to-addeventlistener-listener-function
 var curryer_function = function(dtu_this) { 
   return function curried_func(event) {
@@ -598,15 +598,17 @@ class DoTheyUse {
   }
 
   unlisten() { // https://stackoverflow.com/questions/55650739/how-to-remove-event-listener-with-currying-function
-    if (this._elements_to_listen_to.length > 0) { // remove all existing dtu listeners if exist
+    if (this._elements_to_listen_to.length > 0) {
       for (let i = 0; i < this._elements_to_listen_to.length; i++) {
-        let element = this._elements_to_listen_to[i];
-        let event_to_listen = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
-        let listener_id = element.dataset[this._dtu_attribute + "Listened"];
-        let a = this._elements_listeners_map[parseInt(listener_id)];
-        element.removeEventListener(event_to_listen, a, false);
-        element.removeAttribute("data-" + this._dtu_attribute + "-listened");
+        const element = this._elements_to_listen_to[i];
+        const event_to_listen = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
+        const listener_id = element.dataset[this._dtu_attribute + "ListenerId"];
+        const listener_function = this._elements_listeners_map[parseInt(listener_id)];
+        element.removeEventListener(event_to_listen, listener_function, false);
+        element.removeAttribute("data-" + this._dtu_attribute + "-listener-id");
       }
+      this._elements_to_listen_to = [];
+      this._elements_listeners_map = {};
     }
   }
 
@@ -615,14 +617,10 @@ class DoTheyUse {
     if (this._status != STATUS_READY)
       return;
 
-    //this.unlisten();
-
     if (this.mode == 'manual')
       this._elements_to_listen_to = this.collect_dtu_elements();
     else
       this._elements_to_listen_to = this.collect_all_elements();
-
-    //console.log(this._elements_to_listen_to.length)
 
     for (let i = 0; i < this._elements_to_listen_to.length; i++) {
       const element = this._elements_to_listen_to[i];
@@ -630,24 +628,22 @@ class DoTheyUse {
         const event_to_listen = DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS[element.tagName][element.type];
         // Prevention of adding listener to an element which is already being listened:
         // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
-        if (element.dataset[this._dtu_attribute + "Listened"] !== undefined)
+        if (element.dataset[this._dtu_attribute + "ListenerId"] !== undefined)
           continue;
 
-        let a = curryer_function(this);
-        element.addEventListener(event_to_listen, a, false);
-        //element.removeEventListener(event_to_listen, a, false);
-        const listener_id = Object.keys(this._elements_listeners_map).length + 1;
-        this._elements_listeners_map[listener_id] = a;
+        const listener_function = curryer_function(this);
+        element.addEventListener(event_to_listen, listener_function, false);
 
-        //let b = this._elements_listeners_map[parseInt(listener_id)];
-        //element.removeEventListener(event_to_listen, b, false);
+        // https://stackoverflow.com/questions/55650739/how-to-remove-event-listener-with-currying-function
+        const listener_id = Object.keys(this._elements_listeners_map).length + 1; // assigning id to remove / update listeners by id
+        this._elements_listeners_map[listener_id] = listener_function;
 
         // When dtu.listen() is called in order not to listen again already listened elements
         // and due to no standard in-browser way of knowing if element has any listeners:
         // https://stackoverflow.com/questions/11455515/how-to-check-whether-dynamically-attached-event-listener-exists-or-not
         // we add attribute which will allow prevention of listening again:
         //element.setAttribute("data-dtu-listened", true);
-        element.dataset[this._dtu_attribute + "Listened"] = listener_id;
+        element.dataset[this._dtu_attribute + "ListenerId"] = listener_id;
       }
       catch (error) {
         console.error("Unsupported element:\n", element, "\n", "element type: ", element.type, error);
