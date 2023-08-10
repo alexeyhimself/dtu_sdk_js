@@ -4,11 +4,6 @@
 const REAL_BACKEND_OPERATION = true; // default is true
 
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
-  report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
-  report['ugids'] = String(report['ugids']);
-  report['value'] = btoa(String(report['value']));
-  report['page_title'] = btoa(String(report['page_title']));
-
   const response = await fetch(api_url + '/api/submit', { // default options are marked with *
     method: "POST",
     mode: "no-cors", // no-cors, *cors, same-origin
@@ -20,7 +15,7 @@ async function DTU_RX_API_submint_report(report, api_url) { // https://developer
     },
     redirect: "follow", // manual, *follow, error
     referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-    body: encodeURIComponent(JSON.stringify(report))
+    body: encodeURIComponent(btoa(JSON.stringify(report))) // // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
   });
   //return response.json(); // causes dtu_sdk.js?v=11:28 Uncaught (in promise) SyntaxError: Unexpected end of input (at d.. due to no-cors
 }
@@ -163,6 +158,10 @@ class DoTheyUse {
   }
   get uid() {
     return this._uid;
+  }
+
+  get status() {
+    return this._status;
   }
 
   set ugids(ugids) {
@@ -412,13 +411,14 @@ class DoTheyUse {
       if (node.dataset[this._dtu_attribute + "Skip"] !== undefined)
         return accumulator;
     
-    if (node.nodeType === 3) {// 3 == text node
+    if (node.nodeType === 3) { // 3 == text node
       let node_text = node.nodeValue.trim();
       if (node_text != '') {
         accumulator.push(node_text);
       }
     }
-    else {
+    else if (node.nodeType !== 8){ // not a comment
+      //console.log(node.nodeType);
       if (node.getAttribute("aria-label")) {
         accumulator.push(node.getAttribute("aria-label").trim());
       }
@@ -430,9 +430,11 @@ class DoTheyUse {
           accumulator.push(node.innerText.trim());
         }
       }
-      else if (node.childNodes) {
-        for (let child of node.childNodes)
+      else if (node.childNodes) {  
+        for (let child of node.childNodes) {
+          //console.log(node.childNodes, child, child.nodeType)
           this.get_nested_inner_text(child, accumulator)
+        }
       }
     }
 
@@ -642,7 +644,7 @@ class DoTheyUse {
       }
     }
 
-    dtu.describe();
+    //dtu.describe();
   }
 }
 
@@ -667,3 +669,5 @@ try { // for jest unit tests
 catch (error) {} // to mute an error "Uncaught ReferenceError: exports is not defined" in browser's dev console
 
 const dtu = dotheyuse();
+dtu.topic = window.location.hostname;
+dtu.url_domain_name = window.location.hostname;
