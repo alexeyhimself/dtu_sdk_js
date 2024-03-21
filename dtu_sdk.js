@@ -1,7 +1,7 @@
 //const excluded_events = "mousedown mouseup mousemove mouseover mouseout mousewheel";
 //const events = "click focus blur keydown change dblclick keydown keyup keypress textInput touchstart touchmove touchend touchcancel resize scroll zoom select change submit reset".split(" ");
 
-const REAL_BACKEND_OPERATION = true; // default is true
+const REAL_BACKEND_OPERATION = false; // default is true
 
 async function DTU_RX_API_submint_report(report, api_url) { // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   report['element_path'] = String(report['element_path']); // for passing through application/x-www-form-urlencoded which is used instead of application/json due to no-cors header
