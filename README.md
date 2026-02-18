@@ -1,8 +1,8 @@
-# JavaScript SDK for ["Do They Use"](https://dotheyuse.com) service 
+# JavaScript SDK for ["Do They Use"](https://alexeyhimself.github.io/dtu_gw) service 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/alexeyhimself/dtu_sdk_js/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/alexeyhimself/dtu_sdk_js/tree/main)
 
 ## About "Do They Use" service
-["Do They Use"](https://dotheyuse.com) service is made to help teams to make data-driven decisions for their products. 
+["Do They Use"](https://alexeyhimself.github.io/dtu_gw) service is made to help teams to make data-driven decisions for their products. 
 The way it helps to make data-driven decisions - is by providing ready-to-go quantitative data reports about their product usage by users for the teams. Teams get visual answers on various questions about their product's elements and features usage and can make decisions based on that data.
 
 Service works similarly to Google Analytics, but aims not Marketing and Sales teams, but Product teams. This service helps teams to find answers on the following quantitative questions:
@@ -20,10 +20,10 @@ This information helps team to:
 Addressed answers on these questions lead to better UX both for Product teams and for Product users. Product gets better and this better is driven not by assumptions but by real usage data by real users.
 
 ## Problems this SDK solves
-* SDK is made for ["Do They Use"](https://dotheyuse.com) web service to simplify:
+* SDK is made for ["Do They Use"](https://alexeyhimself.github.io/dtu_gw) web service to simplify:
   * adding listeners for specified events ("click", "change", etc.) for specified elements (link, checkbox, dropdown, etc.) of web page(s) it is installed for;
   * translation these events into web log reports;
-  * sending these reports to ["Do They Use"](https://dotheyuse.com) service API.
+  * sending these reports to ["Do They Use"](https://alexeyhimself.github.io/dtu_gw) service API.
 * This repository starts teamwork and collaboration for users of "Do They Use" service and of this SDK.
 
 ## Demo
