@@ -113,6 +113,8 @@ test('SDK .unlisten() method works', () => {
   const element_name = 'some ' + type;
   element['dataset'][dtu._dtu_attribute] = element_name;
   element['value'] = 'some text';
+  element['removeEventListener'] = function () {};
+  element['removeAttribute'] = function () {};
   const em = dtu.collect_all_elements = function () {return [element]};
   dtu._elements_to_listen_to = em();
   dtu.unlisten();
