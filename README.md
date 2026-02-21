@@ -27,11 +27,12 @@ Addressed answers on these questions lead to better UX both for Product teams an
 * This repository starts teamwork and collaboration for users of "Do They Use" service and of this SDK.
 
 ## Demo
-1. Open [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html)
-2. Open browser's dev console
-3. Change drop-down value on demo page
+1. Open [Story Book](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_story_book.html).
+2. Interact with elements on demo page
 
-What to expect: on each drop-down value change in console will appear a new report.
+What to expect: 
+1. On each interaction detected change will appear in "element and value to be sent in a report" field;
+2. Full report that would be sent in case of such interaction will be logged in browser's console.
 
 ## How it works
 When installed in web page (see for example [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html)), SDK listens to events from specified (tagged by `data-dtu` attribute by default) elements on web page, builds JSON reports and sends them to specified `callback` (which is `console.log` by default) function. `callback` could be a function that sends these reports to API (and this is how this SDK is used in "Do They Use" service).
