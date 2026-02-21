@@ -2,8 +2,8 @@
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/alexeyhimself/dtu_sdk_js/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/alexeyhimself/dtu_sdk_js/tree/main)
 
 ## About "Do They Use" service
-["Do They Use"](https://alexeyhimself.github.io/dtu_gw) service is made to help teams to make data-driven decisions for their products. 
-The way it helps to make data-driven decisions - is by providing ready-to-go quantitative data reports about their product usage by users for the teams. Teams get visual answers on various questions about their product's elements and features usage and can make decisions based on that data.
+["Do They Use"](https://alexeyhimself.github.io/dtu_gw) service is made to help teams to make data-informed decisions for their products. 
+The way it helps to make data-informed decisions - is by providing ready-to-go quantitative data reports about their product usage by users for the teams. Teams get visual answers on various questions about their product's elements and features usage and can make decisions based on that data.
 
 Service works similarly to Google Analytics, but aims not Marketing and Sales teams, but Product teams. This service helps teams to find answers on the following quantitative questions:
 * Do users use specified (tagged) web elements (buttons, links, check-boxes, etc.)?
@@ -37,7 +37,7 @@ What to expect: on each drop-down value change in console will appear a new repo
 When installed in web page (see for example [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_js_demo.html)), SDK listens to events from specified (tagged by `data-dtu` attribute by default) elements on web page, builds JSON reports and sends them to specified `callback` (which is `console.log` by default) function. `callback` could be a function that sends these reports to API (and this is how this SDK is used in "Do They Use" service).
 
 ## Supported elements types
-List of currently supported elements types is available [here](/dtu_sdk.js#L6).
+List of currently supported elements types is available [here](/dtu_sdk.js#L38).
 You can play all currently supported elements in a [Story Book](https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk_story_book.html).
 
 ## Story Book
@@ -69,7 +69,7 @@ Incorrectly installed SDK will reply with an error message related to that speci
 
 ## How to use
 ### Basic usage
-1. To any (of [supported types](/dtu_sdk.js#L6)) element of your web page add `data-dtu` attribute. For example:
+1. To any (of [supported types](/dtu_sdk.js#L38)) element of your web page add `data-dtu` attribute. For example:
 ```html
 <select data-dtu="some dropdown">
   <option>value 1</option>
