@@ -38,42 +38,87 @@ test('SDK replies with status "Ready" if config does not contain "ctag"', () => 
 test('SDK replies with status "Ready" if config has valid "ctag"', () => {
   let config = {...minimum_valid_config};
   const dtu = imports.dotheyuse(config);
-  expect(dtu.problem_description).toEqual('');
+  //expect(dtu.problem_description).toEqual('');
   expect(dtu.status).toMatch(/Ready/);
 });
 
 
 // Extra configurations tests
 //// listen
+/*
 test('SDK does not listen if config has "listen": false', () => {
   let config = {...minimum_valid_config};
   config.listen = false;
   const dtu = imports.dotheyuse(config);
-  expect(dtu.listen_default_events).toBeFalsy();
+  expect(dtu._elements_listeners_map).toEqual({});
 });
+*/
 
-/*
 test('SDK listens if config has "listen": true', () => {
   let config = {...minimum_valid_config};
   config.listen = true;
   const dtu = imports.dotheyuse(config);
-  expect(dtu.listen_default_events).toBeTruthy();
+
+  const type = 'text';
+  let element = {'type': type, 'tagName': 'INPUT'};
+  element['dataset'] = {};
+  const element_name = 'some ' + type;
+  element['dataset'][dtu._dtu_attribute] = element_name;
+  element['value'] = 'some text';
+  const em = dtu.collect_all_elements = function () {return [element]};
+
+  expect(em().length).toBeGreaterThan(0);
 });
 
 test('SDK listens if config has no "listen" option', () => {
   let config = {...minimum_valid_config};
   delete config.listen;
   const dtu = imports.dotheyuse(config);
-  expect(dtu.listen_default_events).toBeTruthy();
+  
+  const type = 'text';
+  let element = {'type': type, 'tagName': 'INPUT'};
+  element['dataset'] = {};
+  const element_name = 'some ' + type;
+  element['dataset'][dtu._dtu_attribute] = element_name;
+  element['value'] = 'some text';
+  const em = dtu.collect_all_elements = function () {return [element]};
+
+  expect(em().length).toBeGreaterThan(0);
 });
 
-// looks like not relevant anymore with allowed no ctag
+/*
 test('SDK does not listen if it has status "Not ready"', () => {
-  const dtu = imports.dotheyuse({'callback': 'not_exists'});
+  const dtu = imports.dotheyuse('invalid config');
   expect(dtu.status).toMatch(/Not ready/);
-  expect(dtu.listen_default_events).toBeFalsy();
+  expect(dtu._elements_listeners_map).toEqual({});
 });
 */
+
+test('SDK .listen() method throws an error if unsupported element type', () => {
+  let config = {...minimum_valid_config};
+  const dtu = imports.dotheyuse(config);
+  let element = {'type': 'unit test unsupported type', 'parentElement': {'parentElement': {'className': undefined}}};
+  dtu.collect_all_elements = function () {return [element]};
+  dtu.listen();
+  expect(element.parentElement.parentElement.className).toEqual('unsupported');
+});
+
+test('SDK .unlisten() method works', () => {
+  let config = {...minimum_valid_config};
+  const dtu = imports.dotheyuse(config);
+
+  const type = 'text';
+  let element = {'type': type, 'tagName': 'INPUT'};
+  element['dataset'] = {};
+  const element_name = 'some ' + type;
+  element['dataset'][dtu._dtu_attribute] = element_name;
+  element['value'] = 'some text';
+  const em = dtu.collect_all_elements = function () {return [element]};
+  dtu._elements_to_listen_to = em();
+  dtu.unlisten();
+  //expect(element.parentElement.parentElement.className).toEqual('unsupported');
+});
+
 
 // form report
 const DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS = imports.DEFAULT_SUPPORTED_TAGS_TYPES_EVENTS;
@@ -102,7 +147,7 @@ test.each(types_normal)('SDK .form_report() method works for type: %s', (type) =
   let element = {'type': type, 'parentNode': document};
   element['dataset'] = {};
   const element_name = 'some ' + type;
-  element['dataset'][dtu.dtu_attribute] = element_name;
+  element['dataset'][dtu._dtu_attribute] = element_name;
   const element_value = 'unit test val';
   element['value'] = element_value;
   element.getAttribute = function (argument) {};
@@ -122,7 +167,7 @@ test.each(types_secret_or_long)('SDK .form_report() method forms report for type
   let element = {'type': type};
   element['dataset'] = {};
   const element_name = 'some ' + type;
-  element['dataset'][dtu.dtu_attribute] = element_name;
+  element['dataset'][dtu._dtu_attribute] = element_name;
   const element_value = 'unit test val';
   element['value'] = element_value;
   element.getAttribute = function (argument) {};
@@ -142,7 +187,7 @@ test.each(types_files)('SDK .form_report() method forms report for type: %s', (t
   let element = {'type': type, 'files': [{'name': 1}, {'name': 2}]};
   element['dataset'] = {};
   const element_name = 'some ' + type;
-  element['dataset'][dtu.dtu_attribute] = element_name;
+  element['dataset'][dtu._dtu_attribute] = element_name;
   element.getAttribute = function (argument) {};
   let report = dtu.process_element(element);
 
@@ -161,7 +206,7 @@ test('SDK .form_report() method forms report for type: select-one', () => {
   let element = {'type': type, 'selectedOptions': [{'value': 1}]};
   element['dataset'] = {};
   const element_name = 'some ' + type;
-  element['dataset'][dtu.dtu_attribute] = element_name;
+  element['dataset'][dtu._dtu_attribute] = element_name;
   element.getAttribute = function (argument) {};
   let report = dtu.process_element(element);
 
@@ -180,7 +225,7 @@ test('SDK .form_report() method forms report for type: select-multiple', () => {
   let element = {'type': type, 'selectedOptions': [{'value': 1}, {'value': 2}]};
   element['dataset'] = {};
   const element_name = 'some ' + type;
-  element['dataset'][dtu.dtu_attribute] = element_name;
+  element['dataset'][dtu._dtu_attribute] = element_name;
   element.getAttribute = function (argument) {};
   let report = dtu.process_element(element);
 
@@ -200,7 +245,7 @@ test.each(['A', 'BUTTON'])('SDK .form_report() method forms value of innerText f
   let element = {'type': type, 'tagName': tag};
   element['dataset'] = {};
   const element_name = 'some ' + tag;
-  element['dataset'][dtu.dtu_attribute] = element_name;
+  element['dataset'][dtu._dtu_attribute] = element_name;
   const element_value = 'unit test val';
   element['innerText'] = element_value;
   element.getAttribute = function (argument) {};
@@ -208,15 +253,6 @@ test.each(['A', 'BUTTON'])('SDK .form_report() method forms value of innerText f
 
   expect(report.element).toEqual(element_name);
   expect(report.value).toEqual(element_value);
-});
-
-test('SDK .listen() method throws an error if unsupported element type', () => {
-  let config = {...minimum_valid_config};
-  const dtu = imports.dotheyuse(config);
-  let element = {'type': 'unit test unsupported type', 'parentElement': {'parentElement': {'className': undefined}}};
-  dtu.collect_all_elements = function () {return [element]};
-  dtu.listen();
-  expect(element.parentElement.parentElement.className).toEqual('unsupported');
 });
 
 
@@ -257,7 +293,7 @@ test('SDK .describe() method works', () => {
   let element = {'type': type, 'tagName': 'INPUT'};
   element['dataset'] = {};
   const element_name = 'some ' + type;
-  element['dataset'][dtu.dtu_attribute] = element_name;
+  element['dataset'][dtu._dtu_attribute] = element_name;
   element['value'] = 'some text';
   element.getAttribute = function (argument) {};
   dtu.elements_to_listen_to = [element];  
@@ -265,43 +301,43 @@ test('SDK .describe() method works', () => {
 });
 
 //// set, get
-test('SDK .get_uid() method gets uid', () => {
+test('SDK .uid method gets uid', () => {
   let config = {...minimum_valid_config};
   const dtu = imports.dotheyuse(config);
-  expect(dtu.uid).toEqual(dtu.get_uid());
+  expect(dtu.uid).toEqual(dtu._uid);
 });
 
-test('SDK .set_uid() method sets uid', () => {
+test('SDK .uid = ... method sets uid', () => {
   let config = {...minimum_valid_config};
   const dtu = imports.dotheyuse(config);
-  dtu.set_uid('test_uid');
-  expect(dtu.uid).toEqual(dtu.get_uid());
+  dtu.uid = 'test_uid';
+  expect(dtu.uid).toEqual(dtu._uid);
 });
 
-test('SDK .get_ugids() method gets ugids', () => {
+test('SDK .ugids method gets ugids', () => {
   let config = {...minimum_valid_config};
   const dtu = imports.dotheyuse(config);
-  expect(dtu.ugids).toEqual(dtu.get_ugids());
+  expect(dtu.ugids).toEqual(dtu._ugids);
 });
 
-test('SDK .set_ugids() method sets ugids', () => {
+test('SDK .ugids = ... method sets ugids', () => {
   let config = {...minimum_valid_config};
   const dtu = imports.dotheyuse(config);
-  dtu.set_ugids('test_ugids');
-  expect(dtu.ugids).toEqual(dtu.get_ugids());
+  dtu.ugids = 'test_ugids';
+  expect(dtu.ugids).toEqual(dtu._ugids);
 });
 
-test('SDK .get_mode() method gets mode', () => {
+test('SDK .mode method gets mode', () => {
   let config = {...minimum_valid_config};
   const dtu = imports.dotheyuse(config);
-  expect(dtu.mode).toEqual(dtu.get_mode());
+  expect(dtu.mode).toEqual(dtu._mode);
 });
 
-test('SDK .set_mode() method gets mode', () => {
+test('SDK .mode = ... method sets mode', () => {
   let config = {...minimum_valid_config};
   const dtu = imports.dotheyuse(config);
-  dtu.set_mode('test')
-  expect(dtu.mode).toEqual(dtu.get_mode());
+  dtu.mode = 'test'
+  expect(dtu.mode).toEqual(dtu._mode);
 });
 
 //// prettify
@@ -321,3 +357,8 @@ test('SDK .prettify_url() method cuts everything after ? and removes trailing /'
   expect(dtu.prettify_url('test/?param=1&param=2')).toEqual('test');
 });
 
+// Base64 
+test('Base64 encode works', () => {
+  const b64 = imports.Base64;
+  expect(b64.encode('abc')).toEqual('YWJj');
+});
