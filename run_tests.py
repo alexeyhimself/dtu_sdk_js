@@ -1,11 +1,13 @@
 import json
 import os
+import sys
 
 MINIMUM_COVERAGE_PERCENT = 60
 
 test_run_exit_code = os.system('npx jest --coverage')
 if test_run_exit_code != 0:
-	exit(test_run_exit_code)
+	# exit(test_run_exit_code)  # doesn't work somewhy for 256, so I sys.exit(1) forcibly
+	sys.exit(1)
 
 f = open('coverage/coverage-final.json')
 data = json.load(f)
@@ -28,4 +30,4 @@ print(msg.format(coverage))
 if coverage < MINIMUM_COVERAGE_PERCENT:
 	msg = "This is less than {0}% minimum threshold, so I fail CI whith exit 1"
 	print(msg.format(MINIMUM_COVERAGE_PERCENT))
-	exit(1)
+	sys.exit(1)
