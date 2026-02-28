@@ -1,7 +1,8 @@
 //const excluded_events = "mousedown mouseup mousemove mouseover mouseout mousewheel";
 //const events = "click focus blur keydown change dblclick keydown keyup keypress textInput touchstart touchmove touchend touchcancel resize scroll zoom select change submit reset".split(" ");
 
-const REAL_BACKEND_OPERATION = false; // default is true
+// const REAL_BACKEND_OPERATION = false; // default is true
+const REAL_BACKEND_OPERATION = !['alexeyhimself.github.io', '', 'localhost--'].includes(window.location.hostname);
 
 /** https://stackoverflow.com/questions/41219542/how-to-import-js-modules-into-typescript-file
 *
