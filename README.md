@@ -49,7 +49,7 @@ All currently supported web elements are available in a [Story Book](https://ale
   <script src="https://alexeyhimself.github.io/dtu_sdk_js/dtu_sdk.js"></script>
   <script type="text/javascript">
     const dtu = dotheyuse({
-      'ctag': 'DTU CTAG',  // DTU CTAG - is a tag from "Do They Use" service
+      'ctag': 'DTU CTAG',  // ctag - is an analogue of gtag in Google Analytics - a unique key for different orgs for DTU deployed as a SaaS
     });
   </script>
 ```
@@ -93,16 +93,7 @@ You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sd
   });
 </script>
 ```
-2. Disable automatic bind to elements to `listen` events
-```js
-<script type="text/javascript">
-  const dtu = dotheyuse({
-    'ctag': 'DTU CTAG',
-    'listen': false
-  });
-</script>
-```
-3. Change default (`data-dtu`) bind attribute (to `data-testid` for example):
+2. Change default (`data-dtu`) bind attribute (to `data-testid` for example):
 ```js
 <script type="text/javascript">
   const dtu = dotheyuse({
@@ -113,15 +104,28 @@ You can try it in in [SDK demo HTML page](https://alexeyhimself.github.io/dtu_sd
 ```
 **Please note**, that `data-` preffix is omited.
 
-4. Specify `topic` explicitly:
+3. Specify `topic`, `uid`, `ugids` explicitly:
 ```js
 <script type="text/javascript">
   const dtu = dotheyuse({
-    'ctag': 'DTU CTAG',
-    'topic': 'custom'
+    'ctag': 'DTU CTAG',  // analogue of gtag for Google Analytics
+    'topic': 'custom',   // subdomain for ctag
+    'uid': '123',
+    'ugids': ['Free Trial', 'Professional', 'Admin']
   });
 </script>
 ```
+
+### Parameters
+| Parameter | Mandatory | Default | Examples | Description |
+| --- | --- | --- | --- | --- |
+| `ctag` | No | 'DEMO MVP' | 'x1298yveve778', 'BI Team', 'Some company department' | Originally stands for "company tag". It's an analogue of `gtag` for Google Analytics. `ctag` is made to support DTU to be deployed as a SaaS and support many orgs. `ctag` must have any (non-empty) string value for self-hosted setups (for example, name of the department or a product inside your org. |
+| `topic` | No | 'default' | 'Some product v1', 'Some team, Some product, v1.5' | `topic` is made to allow sending analytics to different isolated spaces inside 1 ctag. Imagine `ctag` as a company key, as a domain, and `topic` as a product / project key, as a subdomain. If you need to slice analytics, and send new data to an empty space, then you may change topic - and data in a new topic will be separated from the data with other topics |
+| `uid` | No | 'you@example.com' | '123456', 'sdf876080870ewv', '98765:12345678', 'name@email.com' | Stands for "User ID". `uid` may be real UID (a number, email, etc.) or any substitute for UID (salted hash, random string or number). `uid` is made to let you distinguish data for different User IDs. If not set, then SDK will automatically generate and save synthetic `uid` into user's browser and all the data will be from 1 default `uid` |
+| `ugids` | Yes | ['Visitor'] | ['Paid', 'Admin'], ['Free Trial', 'User', 'Owner'] | Stands for "User Groups IDs". `ugids` is made to introduce different dimentions for the roles and permissions of the `uid` | 
+| `dtu_attribute` | No | 'dtu' | 'dotheyuse', 'analytics' | Was introduced to avoid situations when you already have `data-dtu` attribute in your product, and it is not related to DTU analytics. In this case, you can set another data attribute name to bind to for a DTU analytics: `data_attribute`: `someting` - and now DTU will bind elements with `data-something` instead of elements with `data-dtu` |
+| `callback` | No | console.log | my_custom_function | Made to let you define custom callback functions instead of sending data somewhere |
+| `api_url` | No | 'http://localhost' | 'https://yourcompany.com/dtu/analytics', 'http://10.10.1.1' | To set any API endpoint to send analytics |
 
 
 ## How to run tests

@@ -48,33 +48,15 @@ test('SDK replies with status "Ready" if config has valid "ctag"', () => {
 /*
 test('SDK does not listen if config has "listen": false', () => {
   let config = {...minimum_valid_config};
-  config.listen = false;
   const dtu = imports.dotheyuse(config);
   expect(dtu._elements_listeners_map).toEqual({});
 });
 */
 
-test('SDK listens if config has "listen": true', () => {
+test('SDK listens the elements', () => {
   let config = {...minimum_valid_config};
-  config.listen = true;
   const dtu = imports.dotheyuse(config);
 
-  const type = 'text';
-  let element = {'type': type, 'tagName': 'INPUT'};
-  element['dataset'] = {};
-  const element_name = 'some ' + type;
-  element['dataset'][dtu._dtu_attribute] = element_name;
-  element['value'] = 'some text';
-  const em = dtu.collect_all_elements = function () {return [element]};
-
-  expect(em().length).toBeGreaterThan(0);
-});
-
-test('SDK listens if config has no "listen" option', () => {
-  let config = {...minimum_valid_config};
-  delete config.listen;
-  const dtu = imports.dotheyuse(config);
-  
   const type = 'text';
   let element = {'type': type, 'tagName': 'INPUT'};
   element['dataset'] = {};

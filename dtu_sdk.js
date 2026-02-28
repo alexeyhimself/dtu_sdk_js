@@ -265,8 +265,6 @@ class DoTheyUse {
   constructor(config) {
     this._status = STATUS_DEFAULT;
 
-    this._uid = this.get_synthetic_uid();
-    this._ugids = this.get_synthetic_ugids();
     this._elements_to_listen_to = [];
     this._elements_listeners_map = {};
 
@@ -278,6 +276,8 @@ class DoTheyUse {
     this._mode = config.mode || DEFAULT_OPERATION_MODE; 
     this._ctag = config.ctag || DEFAULT_CTAG;
     this._topic = config.topic || DEFAULT_TOPIC;
+    this._uid = config.uid || this.get_synthetic_uid();
+    this._ugids = config.ugids || this.get_synthetic_ugids();
     this._dtu_attribute = config.dtu_attribute || DEFAULT_DTU_DATASET_ATTRIBUTE;
     this._api_url = config.api_url || DEFAULT_API_URL;
     this._callback = config.callback || DEFAULT_CALLBACK;
